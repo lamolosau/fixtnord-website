@@ -240,40 +240,58 @@
               ></div>
 
               <div
-                class="w-20 h-full bg-white/10 backdrop-blur-md border-r border-white/5 flex flex-col items-center py-6 justify-between z-20 relative"
+                class="w-14 md:w-20 h-full bg-white/10 backdrop-blur-md border-r border-white/5 flex flex-col items-center py-4 md:py-6 justify-between z-20 relative"
               >
-                <div class="flex flex-col items-center gap-2 text-white/90">
-                  <div class="text-[10px] font-bold tracking-widest">09:41</div>
-                  <div class="flex gap-[2px] items-end h-3">
-                    <div class="w-1 h-1.5 bg-white rounded-full"></div>
-                    <div class="w-1 h-2 bg-white rounded-full"></div>
-                    <div class="w-1 h-3 bg-white rounded-full"></div>
-                    <div class="w-1 h-2 bg-white/30 rounded-full"></div>
+                <div
+                  class="flex flex-col items-center gap-1 md:gap-2 text-white/90"
+                >
+                  <div
+                    class="text-[8px] md:text-[10px] font-bold tracking-widest"
+                  >
+                    09:41
+                  </div>
+                  <div class="flex gap-[2px] items-end h-2 md:h-3">
+                    <div
+                      class="w-0.5 md:w-1 h-1 md:h-1.5 bg-white rounded-full"
+                    ></div>
+                    <div
+                      class="w-0.5 md:w-1 h-1.5 md:h-2 bg-white rounded-full"
+                    ></div>
+                    <div
+                      class="w-0.5 md:w-1 h-2 md:h-3 bg-white rounded-full"
+                    ></div>
+                    <div
+                      class="w-0.5 md:w-1 h-1.5 md:h-2 bg-white/30 rounded-full"
+                    ></div>
                   </div>
                 </div>
 
-                <div class="flex flex-col gap-4 w-full items-center">
+                <div class="flex flex-col gap-3 md:gap-4 w-full items-center">
                   <div
-                    class="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/20 hover:scale-105 transition cursor-pointer"
+                    class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/20 hover:scale-105 transition cursor-pointer"
                   >
-                    <i class="fa-solid fa-phone text-xs"></i>
+                    <i class="fa-solid fa-phone text-[10px] md:text-xs"></i>
                   </div>
                   <div
-                    class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 hover:scale-105 transition cursor-pointer"
+                    class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 hover:scale-105 transition cursor-pointer"
                   >
-                    <i class="fa-solid fa-location-arrow text-xs"></i>
+                    <i
+                      class="fa-solid fa-location-arrow text-[10px] md:text-xs"
+                    ></i>
                   </div>
                   <div
-                    class="w-10 h-10 rounded-xl bg-[#1DB954] flex items-center justify-center text-white shadow-lg shadow-green-500/20 hover:scale-105 transition cursor-pointer"
+                    class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#1DB954] flex items-center justify-center text-white shadow-lg shadow-green-500/20 hover:scale-105 transition cursor-pointer"
                   >
-                    <i class="fa-brands fa-spotify text-xs"></i>
+                    <i class="fa-brands fa-spotify text-[10px] md:text-xs"></i>
                   </div>
                 </div>
 
                 <div
-                  class="w-10 h-10 hover:bg-white/10 rounded-full transition flex items-center justify-center cursor-pointer"
+                  class="w-8 h-8 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition flex items-center justify-center cursor-pointer"
                 >
-                  <div class="grid grid-cols-2 gap-1 w-4 h-4 opacity-80">
+                  <div
+                    class="grid grid-cols-2 gap-0.5 md:gap-1 w-3 h-3 md:w-4 md:h-4 opacity-80"
+                  >
                     <div class="bg-white rounded-[1px]"></div>
                     <div class="bg-white rounded-[1px]"></div>
                     <div class="bg-white rounded-[1px]"></div>
@@ -282,107 +300,110 @@
                 </div>
               </div>
 
-              <div class="flex-1 p-8 z-20 flex items-center justify-center">
+              <div
+                class="flex-1 p-2 md:p-8 z-20 flex items-center justify-center"
+              >
                 <div
-                  class="grid grid-cols-4 gap-x-6 gap-y-6 group-hover:scale-105 transition-transform duration-500"
+                  class="grid grid-cols-4 gap-x-2 gap-y-3 md:gap-x-6 md:gap-y-6 group-hover:scale-105 transition-transform duration-500"
                 >
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl md:text-3xl shadow-lg shadow-blue-500/30 ring-1 ring-white/10"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-base md:text-3xl shadow-lg ring-1 ring-white/10"
                     >
                       <i class="fa-solid fa-location-arrow"></i>
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Plans</span
                     >
                   </div>
 
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-[#fa2d48] to-[#9f0e21] flex items-center justify-center text-white text-2xl md:text-3xl shadow-lg shadow-red-500/30 ring-1 ring-white/10"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-[#fa2d48] to-[#9f0e21] flex items-center justify-center text-white text-base md:text-3xl shadow-lg ring-1 ring-white/10"
                     >
                       <i class="fa-solid fa-music"></i>
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Musique</span
                     >
                   </div>
 
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-2xl md:text-3xl shadow-lg shadow-green-500/30 ring-1 ring-white/10"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-base md:text-3xl shadow-lg ring-1 ring-white/10"
                     >
                       <i class="fa-solid fa-comment"></i>
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Messages</span
                     >
                   </div>
 
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white flex items-center justify-center text-[#5475FF] text-2xl md:text-3xl shadow-lg shadow-white/10 ring-1 ring-white/20"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white flex items-center justify-center text-[#5475FF] text-base md:text-3xl shadow-lg ring-1 ring-white/20"
                     >
                       <i class="fa-solid fa-bolt"></i>
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Fixt.</span
                     >
                   </div>
 
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-2xl md:text-3xl shadow-lg shadow-slate-500/30 ring-1 ring-white/10"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-base md:text-3xl shadow-lg ring-1 ring-white/10"
                     >
                       <i class="fa-solid fa-gear"></i>
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Réglages</span
                     >
                   </div>
 
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white text-2xl md:text-3xl shadow-lg shadow-green-600/30 ring-1 ring-white/10"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white text-base md:text-3xl shadow-lg ring-1 ring-white/10"
                     >
                       <i class="fa-solid fa-phone"></i>
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Tél.</span
                     >
                   </div>
 
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white flex items-center justify-center text-red-500 text-2xl md:text-3xl shadow-lg shadow-white/10 relative overflow-hidden ring-1 ring-white/20"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white flex items-center justify-center text-red-500 text-base md:text-3xl shadow-lg relative overflow-hidden ring-1 ring-white/20"
                     >
                       <div
-                        class="absolute top-0 w-full h-3 md:h-4 bg-red-500"
+                        class="absolute top-0 w-full h-2 md:h-4 bg-red-500"
                       ></div>
-                      <span class="mt-2 text-lg font-bold text-slate-800"
+                      <span
+                        class="mt-1 md:mt-2 text-xs md:text-lg font-bold text-slate-800"
                         >12</span
                       >
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Calendrier</span
                     >
                   </div>
 
-                  <div class="flex flex-col items-center gap-2">
+                  <div class="flex flex-col items-center gap-1 md:gap-2">
                     <div
-                      class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-2xl md:text-3xl shadow-lg shadow-purple-500/30 ring-1 ring-white/10"
+                      class="w-9 h-9 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-base md:text-3xl shadow-lg ring-1 ring-white/10"
                     >
                       <i class="fa-solid fa-podcast"></i>
                     </div>
                     <span
-                      class="text-[9px] md:text-[10px] text-white font-medium tracking-wide opacity-90"
+                      class="text-[7px] md:text-[10px] text-white font-medium tracking-wide opacity-90 truncate w-12 md:w-auto text-center"
                       >Podcasts</span
                     >
                   </div>
