@@ -868,6 +868,8 @@ window.switchTab = function (tab) {
   const targetBtn = document.getElementById(`btn-${tab}`);
   if (targetBtn) targetBtn.classList.add("active");
 
+  if (tab === "reviews") renderReviewsView();
+
   if (tab === "calendar") setTimeout(() => initAdminCalendar(), 50);
   if (tab === "bookings") renderAllBookingsView();
 };
@@ -1015,3 +1017,111 @@ async function loadReviewsCarousel() {
   // On injecte : Original + Original (le clone)
   wrapper.innerHTML = reviewsHTML + reviewsHTML;
 }
+
+// =============================================================================
+// GESTION DES AVIS (ADMIN)
+// =============================================================================
+
+window.renderReviewsView = async function () {
+  const tbody = document.getElementById("reviews-table-body");
+  if (!tbody) return;
+
+  tbody.innerHTML =
+    '<tr><td colspan="6" class="text-center p-4 text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</td></tr>';
+
+  const { data: reviews, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center p-4 text-red-400">Erreur: ${error.message}</td></tr>`;
+    return;
+  }
+
+  if (!reviews || reviews.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" class="text-center p-4 text-slate-500">Aucun avis reçu pour le moment.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = reviews
+    .map((r) => {
+      const stars = Array(5)
+        .fill(0)
+        .map((_, i) =>
+          i < r.rating
+            ? '<i class="fa-solid fa-star text-orange-400 text-xs"></i>'
+            : '<i class="fa-regular fa-star text-slate-600 text-xs"></i>'
+        )
+        .join("");
+
+      const isApproved = r.approved === true;
+      const statusBadge = isApproved
+        ? '<span class="status-badge status-confirmed">En ligne</span>'
+        : '<span class="status-badge status-pending">Masqué</span>';
+
+      const toggleBtn = isApproved
+        ? `<button onclick="toggleReviewStatus('${r.id}', false)" class="btn-action bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white" title="Masquer"><i class="fa-solid fa-eye-slash"></i></button>`
+        : `<button onclick="toggleReviewStatus('${r.id}', true)" class="btn-action bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white" title="Publier"><i class="fa-solid fa-check"></i></button>`;
+
+      return `
+      <tr class="hover:bg-white/5 transition">
+        <td class="text-slate-400 text-sm">${new Date(
+          r.created_at
+        ).toLocaleDateString()}</td>
+        <td>
+            <div class="font-bold text-white">${r.customer_name}</div>
+            <div class="text-xs text-slate-500">${
+              r.car_model || "Véhicule inconnu"
+            }</div>
+        </td>
+        <td><div class="flex gap-1">${stars}</div></td>
+        <td class="text-sm text-slate-300 italic">"${r.comment}"</td>
+        <td>${statusBadge}</td>
+        <td class="text-right py-4">
+            ${toggleBtn}
+            <button onclick="deleteReview('${
+              r.id
+            }')" class="btn-action bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white" title="Supprimer définitivement"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+    })
+    .join("");
+};
+
+window.toggleReviewStatus = async function (id, newStatus) {
+  const btn = event.currentTarget;
+  const originalContent = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+  const { error } = await supabase
+    .from("reviews")
+    .update({ approved: newStatus })
+    .eq("id", id);
+
+  if (!error) {
+    showNotification(
+      newStatus ? "Avis publié sur le site !" : "Avis masqué.",
+      "success"
+    );
+    renderReviewsView();
+  } else {
+    showNotification("Erreur lors de la mise à jour.", "error");
+    btn.innerHTML = originalContent;
+  }
+};
+
+window.deleteReview = function (id) {
+  showConfirm("Supprimer définitivement cet avis ?", async () => {
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+
+    if (!error) {
+      showNotification("Avis supprimé.", "success");
+      renderReviewsView();
+    } else {
+      showNotification("Erreur suppression.", "error");
+    }
+  });
+};

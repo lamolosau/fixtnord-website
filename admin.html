@@ -255,6 +255,20 @@
             >Services</span
           >
         </button>
+        <button
+          onclick="switchTab('reviews')"
+          id="btn-reviews"
+          class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5 group"
+        >
+          <div
+            class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#5475FF] group-hover:shadow-[0_0_15px_#5475FF] transition-all duration-300"
+          >
+            <i class="fa-solid fa-star text-sm"></i>
+          </div>
+          <span class="hidden lg:block font-bold text-sm tracking-wide"
+            >Avis Clients</span
+          >
+        </button>
       </nav>
 
       <div class="p-6 border-t border-white/5">
@@ -509,6 +523,41 @@
                 Catalogue Actif
               </h3>
               <div id="admin-services-list" class="space-y-4"></div>
+            </div>
+          </div>
+        </div>
+        <div
+          id="view-reviews"
+          class="hidden-view absolute inset-0 px-8 pb-8 overflow-y-auto fade-in"
+        >
+          <div
+            class="glass-panel rounded-3xl overflow-hidden flex flex-col h-full"
+          >
+            <div
+              class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5"
+            >
+              <h3 class="font-bold text-white text-lg">Modération des Avis</h3>
+              <button
+                onclick="renderReviewsView()"
+                class="text-xs bg-[#5475FF]/20 text-[#5475FF] border border-[#5475FF]/30 hover:bg-[#5475FF] hover:text-white px-4 py-2 rounded-lg transition font-bold"
+              >
+                <i class="fa-solid fa-rotate-right mr-1"></i> Actualiser
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full glass-table text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Client & Véhicule</th>
+                    <th>Note</th>
+                    <th class="w-1/3">Commentaire</th>
+                    <th>Statut</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="reviews-table-body"></tbody>
+              </table>
             </div>
           </div>
         </div>
