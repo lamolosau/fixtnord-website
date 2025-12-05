@@ -890,3 +890,128 @@ window.handleAddService = async function (e) {
 };
 
 window.dbDeleteService = dbDeleteService;
+
+// =============================================================================
+// 7. SYSTEME D'AVIS (REVIEWS)
+// =============================================================================
+
+// --- GESTION DU FORMULAIRE (avis.html) ---
+document.addEventListener("DOMContentLoaded", () => {
+  // Gestion des étoiles
+  const stars = document.querySelectorAll("#star-container i");
+  const ratingInput = document.getElementById("rating-value");
+
+  if (stars.length > 0) {
+    stars.forEach((star) => {
+      star.addEventListener("click", () => {
+        const val = star.getAttribute("data-value");
+        ratingInput.value = val;
+        updateStars(val);
+      });
+    });
+  }
+
+  function updateStars(value) {
+    stars.forEach((s) => {
+      const sVal = s.getAttribute("data-value");
+      if (sVal <= value) {
+        s.classList.remove("fa-regular");
+        s.classList.add("fa-solid", "text-orange-400");
+      } else {
+        s.classList.remove("fa-solid", "text-orange-400");
+        s.classList.add("fa-regular");
+      }
+    });
+  }
+
+  // Soumission du formulaire
+  const reviewForm = document.getElementById("review-form");
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const rating = document.getElementById("rating-value").value;
+      if (!rating)
+        return showNotification("Veuillez sélectionner une note.", "error");
+
+      const btn = document.getElementById("btn-submit-review");
+      const originalText = btn.innerText;
+      btn.innerText = "Envoi...";
+      btn.disabled = true;
+
+      const { error } = await supabase.from("reviews").insert([
+        {
+          customer_name: document.getElementById("review-name").value,
+          car_model: document.getElementById("review-car").value,
+          comment: document.getElementById("review-comment").value,
+          rating: parseInt(rating),
+          approved: false, // Sécurité : à valider en base de données
+        },
+      ]);
+
+      if (!error) {
+        reviewForm.classList.add("hidden");
+        document.getElementById("review-success").classList.remove("hidden");
+      } else {
+        showNotification("Erreur lors de l'envoi.", "error");
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    });
+  }
+
+  // Chargement du Carrousel (index.html)
+  if (document.getElementById("scrolling-wrapper-dynamic")) {
+    loadReviewsCarousel();
+  }
+});
+
+// --- LOGIQUE DU CARROUSEL DYNAMIQUE ---
+async function loadReviewsCarousel() {
+  const wrapper = document.getElementById("scrolling-wrapper-dynamic");
+
+  // 1. Récupérer les avis validés
+  // Note: Assure-toi d'avoir mis 'approved' à TRUE dans ta base pour tester
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("approved", true)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (!reviews || reviews.length < 3) {
+    // S'il n'y a pas assez d'avis, on garde le HTML statique par défaut ou on met un message
+    console.log("Pas assez d'avis pour le carrousel dynamique.");
+    return;
+  }
+
+  // 2. Générer le HTML d'une carte
+  const generateCard = (r) => {
+    return `
+        <div class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">
+                    ${r.customer_name.charAt(0)}
+                </div>
+                <div>
+                    <div class="font-bold text-[#002050]">${
+                      r.customer_name
+                    }</div>
+                    <div class="text-xs text-slate-400">${r.car_model}</div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                    <i class="fa-solid fa-star"></i> ${r.rating}/5
+                </div>
+            </div>
+            <p class="text-slate-500 text-sm leading-relaxed line-clamp-4">"${
+              r.comment
+            }"</p>
+        </div>`;
+  };
+
+  // 3. Construire la boucle (Contenu Original + Clone pour l'infini)
+  const reviewsHTML = reviews.map((r) => generateCard(r)).join("");
+
+  // On injecte : Original + Original (le clone)
+  wrapper.innerHTML = reviewsHTML + reviewsHTML;
+}

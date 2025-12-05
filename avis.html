@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fixt. - Laisser un avis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body
+    class="flex flex-col min-h-screen bg-[#F8FAFC] font-sans text-slate-800"
+  >
+    <nav
+      class="w-full py-6 px-8 flex justify-between items-center max-w-7xl mx-auto"
+    >
+      <a href="index.html" class="hover:opacity-80 transition">
+        <img
+          src="img/logo.png"
+          alt="Fixt Logo"
+          class="h-20 w-auto object-contain"
+        />
+      </a>
+      <a
+        href="index.html"
+        class="text-slate-500 hover:text-[#002050] font-semibold text-sm transition"
+      >
+        <i class="fa-solid fa-arrow-left mr-1"></i> Retour au site
+      </a>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+      <div
+        class="max-w-md w-full glass-panel p-8 rounded-3xl bg-white shadow-xl border border-slate-100 relative overflow-hidden"
+      >
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-[#5475FF] rounded-bl-full opacity-10 pointer-events-none"
+        ></div>
+
+        <div class="text-center mb-8 relative z-10">
+          <h1 class="text-2xl font-extrabold text-[#002050]">
+            Votre avis compte
+          </h1>
+          <p class="text-slate-500 text-sm mt-2">
+            Partagez votre expérience d'installation.
+          </p>
+        </div>
+
+        <form id="review-form" class="space-y-4 relative z-10">
+          <div class="flex flex-col items-center mb-4">
+            <label
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+              >Note globale</label
+            >
+            <div class="flex gap-2 text-2xl cursor-pointer" id="star-container">
+              <i
+                class="fa-regular fa-star hover:text-orange-400 transition"
+                data-value="1"
+              ></i>
+              <i
+                class="fa-regular fa-star hover:text-orange-400 transition"
+                data-value="2"
+              ></i>
+              <i
+                class="fa-regular fa-star hover:text-orange-400 transition"
+                data-value="3"
+              ></i>
+              <i
+                class="fa-regular fa-star hover:text-orange-400 transition"
+                data-value="4"
+              ></i>
+              <i
+                class="fa-regular fa-star hover:text-orange-400 transition"
+                data-value="5"
+              ></i>
+            </div>
+            <input type="hidden" id="rating-value" required />
+          </div>
+
+          <input
+            type="text"
+            id="review-name"
+            placeholder="Votre Prénom (ex: Thomas)"
+            required
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#5475FF] transition"
+          />
+
+          <input
+            type="text"
+            id="review-car"
+            placeholder="Véhicule (ex: Audi A3 2017)"
+            required
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#5475FF] transition"
+          />
+
+          <textarea
+            id="review-comment"
+            rows="4"
+            placeholder="Votre commentaire..."
+            required
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#5475FF] transition"
+          ></textarea>
+
+          <button
+            type="submit"
+            id="btn-submit-review"
+            class="w-full bg-[#002050] hover:bg-[#5475FF] text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-1"
+          >
+            Publier mon avis
+          </button>
+        </form>
+
+        <div
+          id="review-success"
+          class="hidden text-center mt-6 p-4 bg-green-50 rounded-xl border border-green-100"
+        >
+          <div class="text-emerald-500 text-3xl mb-2">
+            <i class="fa-solid fa-check-circle"></i>
+          </div>
+          <h3 class="font-bold text-[#002050]">Merci !</h3>
+          <p class="text-sm text-slate-500">
+            Votre avis a été envoyé et sera visible après validation.
+          </p>
+          <a
+            href="index.html"
+            class="block mt-4 text-[#5475FF] font-bold text-sm hover:underline"
+            >Retour à l'accueil</a
+          >
+        </div>
+      </div>
+    </main>
+
+    <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"
+    ></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
