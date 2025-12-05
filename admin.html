@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fixt. - Dashboard Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+      /* --- PREVENTS FLASH OF UNSTYLED CONTENT (FOUC) --- */
+      body {
+        display: none; /* Caché par défaut, affiché par JS une fois chargé */
+        background-color: #020617;
+        color: #e2e8f0;
+        overflow: hidden;
+      }
+
+      /* Navigation latérale en verre */
+      .glass-sidebar {
+        background: rgba(2, 6, 23, 0.6);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      /* Style des boutons de nav */
+      .nav-btn.active {
+        background: rgba(84, 117, 255, 0.2) !important;
+        color: #fff !important;
+        border: 1px solid rgba(84, 117, 255, 0.3);
+        box-shadow: 0 0 15px rgba(84, 117, 255, 0.1);
+      }
+
+      /* --- TABLEAUX & LISTES --- */
+      .glass-table th {
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 1.2rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: left;
+      }
+      .glass-table td {
+        padding: 1.2rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        vertical-align: middle;
+      }
+      .glass-table tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      /* BADGES STATUT */
+      .status-badge {
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+      }
+      .status-pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+      }
+      .status-confirmed {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+      }
+      .status-finished {
+        background: rgba(148, 163, 184, 0.15);
+        color: #cbd5e1;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+      }
+
+      /* BOUTONS ACTIONS */
+      .btn-action {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        margin-left: 8px;
+      }
+      .btn-action:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+      }
+      .btn-action:active {
+        transform: scale(0.95);
+      }
+
+      /* --- FULLCALENDAR THEME --- */
+      :root {
+        --fc-border-color: rgba(255, 255, 255, 0.05);
+        --fc-page-bg-color: transparent;
+        --fc-neutral-bg-color: rgba(255, 255, 255, 0.02);
+        --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.05);
+        --fc-today-bg-color: rgba(84, 117, 255, 0.05) !important;
+        --fc-now-indicator-color: #ef4444;
+      }
+      .fc-theme-standard th {
+        border: none;
+        border-bottom: 1px solid var(--fc-border-color);
+        padding: 10px 0;
+      }
+      .fc-timegrid-slot {
+        height: 3rem !important;
+      }
+      .fc-col-header-cell-cushion {
+        color: #94a3b8;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+      }
+      .fc-event {
+        cursor: pointer;
+        border: none !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* --- MODALES --- */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      .modal-backdrop.active {
+        display: flex !important;
+        opacity: 1;
+      }
+      .modal-backdrop.active .modal-content {
+        transform: scale(1);
+        opacity: 1;
+      }
+      .glass-modal {
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border-radius: 24px;
+        transform: scale(0.95);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+    </style>
+  </head>
+  <body
+    class="flex h-screen font-sans antialiased selection:bg-[#5475FF] selection:text-white"
+  >
+    <div class="bg-grid"></div>
+    <div
+      class="fixed top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#5475FF] rounded-full blur-[150px] opacity-10 pointer-events-none"
+    ></div>
+    <div
+      class="fixed bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-900 rounded-full blur-[150px] opacity-10 pointer-events-none"
+    ></div>
+
+    <aside
+      class="w-20 lg:w-72 flex-shrink-0 flex flex-col glass-sidebar z-50 transition-all duration-300"
+    >
+      <div
+        class="h-32 flex items-center justify-center border-b border-white/5"
+      >
+        <img
+          src="img/logo.png"
+          alt="Fixt"
+          class="h-20 w-auto brightness-0 invert drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-transform hover:scale-105"
+        />
+      </div>
+
+      <nav class="flex-1 py-8 px-4 space-y-3">
+        <button
+          onclick="switchTab('dashboard')"
+          id="btn-dashboard"
+          class="nav-btn active w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5 group"
+        >
+          <div
+            class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#5475FF] group-hover:shadow-[0_0_15px_#5475FF] transition-all duration-300"
+          >
+            <i class="fa-solid fa-chart-pie text-sm"></i>
+          </div>
+          <span class="hidden lg:block font-bold text-sm tracking-wide"
+            >Vue d'ensemble</span
+          >
+        </button>
+
+        <button
+          onclick="switchTab('bookings')"
+          id="btn-bookings"
+          class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5 group"
+        >
+          <div
+            class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#5475FF] group-hover:shadow-[0_0_15px_#5475FF] transition-all duration-300"
+          >
+            <i class="fa-solid fa-address-book text-sm"></i>
+          </div>
+          <span class="hidden lg:block font-bold text-sm tracking-wide"
+            >Réservations</span
+          >
+        </button>
+
+        <button
+          onclick="switchTab('calendar')"
+          id="btn-calendar"
+          class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5 group"
+        >
+          <div
+            class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#5475FF] group-hover:shadow-[0_0_15px_#5475FF] transition-all duration-300"
+          >
+            <i class="fa-regular fa-calendar text-sm"></i>
+          </div>
+          <span class="hidden lg:block font-bold text-sm tracking-wide"
+            >Calendrier</span
+          >
+        </button>
+
+        <button
+          onclick="switchTab('services')"
+          id="btn-services"
+          class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5 group"
+        >
+          <div
+            class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#5475FF] group-hover:shadow-[0_0_15px_#5475FF] transition-all duration-300"
+          >
+            <i class="fa-solid fa-screwdriver-wrench text-sm"></i>
+          </div>
+          <span class="hidden lg:block font-bold text-sm tracking-wide"
+            >Services</span
+          >
+        </button>
+      </nav>
+
+      <div class="p-6 border-t border-white/5">
+        <button
+          onclick="logout()"
+          class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:text-white hover:bg-red-500/20 rounded-xl transition-all group border border-transparent hover:border-red-500/30"
+        >
+          <i
+            class="fa-solid fa-arrow-right-from-bracket group-hover:-translate-x-1 transition-transform"
+          ></i>
+          <span
+            class="hidden lg:block font-bold text-xs uppercase tracking-wider"
+            >Déconnexion</span
+          >
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col relative overflow-hidden z-10">
+      <header class="h-24 flex items-center justify-between px-8 z-40">
+        <div>
+          <h1
+            class="text-2xl font-bold text-white tracking-tight"
+            id="page-title"
+          >
+            Tableau de bord
+          </h1>
+          <p class="text-slate-500 text-sm">
+            Bienvenue dans votre espace de gestion.
+          </p>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right hidden sm:block">
+            <div class="text-sm font-bold text-white">Administrateur</div>
+            <div
+              class="text-[10px] text-emerald-400 font-bold tracking-wider flex items-center justify-end gap-1"
+            >
+              <span
+                class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
+              ></span>
+              SYSTEM ONLINE
+            </div>
+          </div>
+          <div
+            class="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#5475FF] to-blue-700 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 border border-white/10"
+          >
+            A
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-hidden relative px-8 pb-8">
+        <div
+          id="view-dashboard"
+          class="absolute inset-0 px-8 pb-8 overflow-y-auto fade-in scroll-smooth"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div
+              class="glass-panel p-6 rounded-3xl relative overflow-hidden group"
+            >
+              <div
+                class="absolute right-0 top-0 w-32 h-32 bg-[#5475FF] opacity-10 blur-2xl group-hover:opacity-20 transition"
+              ></div>
+              <div
+                class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2"
+              >
+                Chiffre d'Affaires
+              </div>
+              <div
+                class="text-4xl font-extrabold text-white tracking-tight"
+                id="stat-revenue"
+              >
+                0€
+              </div>
+            </div>
+            <div
+              class="glass-panel p-6 rounded-3xl relative overflow-hidden group"
+            >
+              <div
+                class="absolute right-0 top-0 w-32 h-32 bg-purple-500 opacity-10 blur-2xl group-hover:opacity-20 transition"
+              ></div>
+              <div
+                class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2"
+              >
+                Réservations Totales
+              </div>
+              <div
+                class="text-4xl font-extrabold text-white tracking-tight"
+                id="count-rdv"
+              >
+                0
+              </div>
+            </div>
+            <div
+              class="glass-panel p-6 rounded-3xl relative overflow-hidden group"
+            >
+              <div
+                class="absolute right-0 top-0 w-32 h-32 bg-emerald-500 opacity-10 blur-2xl group-hover:opacity-20 transition"
+              ></div>
+              <div
+                class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2"
+              >
+                Services Actifs
+              </div>
+              <div
+                class="text-4xl font-extrabold text-white tracking-tight"
+                id="count-services"
+              >
+                0
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="glass-panel rounded-3xl overflow-hidden min-h-[400px] flex flex-col"
+          >
+            <div
+              class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5"
+            >
+              <h3 class="font-bold text-white text-lg">
+                <i
+                  class="fa-solid fa-clock-rotate-left mr-2 text-[#5475FF]"
+                ></i>
+                Activité Récente
+              </h3>
+            </div>
+            <div
+              id="bookings-list"
+              class="divide-y divide-white/5 text-sm flex-1"
+            >
+              <div
+                class="p-8 text-center text-slate-500 flex flex-col items-center"
+              >
+                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                Chargement...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="view-bookings"
+          class="hidden-view absolute inset-0 px-8 pb-8 overflow-y-auto fade-in"
+        >
+          <div
+            class="glass-panel rounded-3xl overflow-hidden flex flex-col h-full"
+          >
+            <div
+              class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5"
+            >
+              <h3 class="font-bold text-white text-lg">
+                Liste des Rendez-vous
+              </h3>
+              <button
+                onclick="renderAllBookingsView()"
+                class="text-xs bg-[#5475FF]/20 text-[#5475FF] border border-[#5475FF]/30 hover:bg-[#5475FF] hover:text-white px-4 py-2 rounded-lg transition font-bold"
+              >
+                <i class="fa-solid fa-rotate-right mr-1"></i> Actualiser
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full glass-table text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Service</th>
+                    <th>Statut</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="all-bookings-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="view-calendar"
+          class="hidden-view absolute inset-0 px-8 pb-8 flex flex-col fade-in"
+        >
+          <div
+            class="glass-panel rounded-3xl flex-1 overflow-hidden relative p-6"
+          >
+            <div id="calendar" class="h-full w-full"></div>
+          </div>
+        </div>
+
+        <div
+          id="view-services"
+          class="hidden-view absolute inset-0 px-8 pb-8 overflow-y-auto fade-in"
+        >
+          <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1">
+              <div class="glass-panel rounded-3xl p-8 sticky top-0">
+                <h3 class="font-bold text-white mb-6 text-xl">
+                  Nouveau Service
+                </h3>
+                <form onsubmit="handleAddService(event)" class="space-y-5">
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Nom</label
+                    >
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Ex: Activation CarPlay"
+                      required
+                      class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] focus:bg-white/5 transition"
+                    />
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <label
+                        class="text-xs font-bold text-slate-500 uppercase ml-1"
+                        >Prix</label
+                      >
+                      <input
+                        type="number"
+                        name="price"
+                        placeholder="€"
+                        required
+                        class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] focus:bg-white/5 transition"
+                      />
+                    </div>
+                    <div class="space-y-1">
+                      <label
+                        class="text-xs font-bold text-slate-500 uppercase ml-1"
+                        >Durée</label
+                      >
+                      <input
+                        type="number"
+                        name="duration"
+                        placeholder="Min"
+                        required
+                        class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] focus:bg-white/5 transition"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="w-full bg-[#5475FF] hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(84,117,255,0.2)] hover:shadow-[0_0_30px_rgba(84,117,255,0.4)] transition-all"
+                  >
+                    Ajouter le service
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="lg:col-span-2">
+              <h3 class="font-bold text-white mb-6 text-xl px-2">
+                Catalogue Actif
+              </h3>
+              <div id="admin-services-list" class="space-y-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="modal-slot" class="modal-backdrop">
+      <div class="glass-modal p-8 w-[400px] modal-content">
+        <div class="flex justify-between items-start mb-8">
+          <div>
+            <h3 class="text-xl font-bold text-white">Disponibilité</h3>
+            <p
+              class="text-xs text-emerald-400 font-bold uppercase tracking-wider mt-1"
+            >
+              Gestion du créneau
+            </p>
+          </div>
+          <button
+            onclick="closeModal('modal-slot')"
+            class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="form-edit-slot" class="space-y-5">
+          <input type="hidden" id="slot-id" />
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400 font-bold uppercase ml-1"
+              >Début</label
+            >
+            <input
+              type="datetime-local"
+              id="slot-start"
+              class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-emerald-500"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400 font-bold uppercase ml-1"
+              >Fin</label
+            >
+            <input
+              type="datetime-local"
+              id="slot-end"
+              class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-emerald-500"
+            />
+          </div>
+          <div class="flex gap-3 pt-6 border-t border-white/10 mt-6">
+            <button
+              type="button"
+              onclick="handleDeleteSlot()"
+              class="px-4 py-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl font-bold text-sm transition flex-1 border border-red-500/20"
+            >
+              <i class="fa-solid fa-trash mr-2"></i> Supprimer
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-3 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl font-bold text-sm transition flex-1 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modal-booking" class="modal-backdrop">
+      <div class="glass-modal p-8 w-[500px] modal-content">
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <h3 class="text-2xl font-bold text-white">Détails Rendez-vous</h3>
+            <p
+              class="text-xs font-bold uppercase tracking-wider mt-1"
+              id="modal-status-text"
+            >
+              ...
+            </p>
+          </div>
+          <button
+            onclick="closeModal('modal-booking')"
+            class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            class="bg-white/5 p-5 rounded-2xl border border-white/5 relative overflow-hidden"
+          >
+            <div
+              class="absolute right-0 top-0 w-20 h-20 bg-[#5475FF] opacity-10 blur-xl"
+            ></div>
+            <div
+              class="text-[10px] text-slate-400 uppercase font-bold mb-2 tracking-wider"
+            >
+              Client
+            </div>
+            <div class="text-white font-bold text-xl" id="booking-client">
+              ...
+            </div>
+            <div class="flex flex-col gap-2 mt-3">
+              <a
+                id="booking-email-link"
+                href="#"
+                class="text-slate-300 text-sm hover:text-white transition flex items-center gap-3"
+              >
+                <div
+                  class="w-6 h-6 rounded-md bg-[#5475FF]/20 flex items-center justify-center text-[#5475FF] text-xs"
+                >
+                  <i class="fa-solid fa-envelope"></i>
+                </div>
+                <span id="booking-email">...</span>
+              </a>
+              <div class="text-slate-300 text-sm flex items-center gap-3">
+                <div
+                  class="w-6 h-6 rounded-md bg-[#5475FF]/20 flex items-center justify-center text-[#5475FF] text-xs"
+                >
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+                <span id="booking-phone">...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Véhicule
+              </div>
+              <div class="text-white font-semibold" id="booking-car">...</div>
+            </div>
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Prix
+              </div>
+              <div
+                class="text-emerald-400 font-bold text-lg"
+                id="booking-price"
+              >
+                ...
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between items-center"
+          >
+            <div>
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Service
+              </div>
+              <div class="text-white font-medium" id="booking-service">...</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Horaire
+              </div>
+              <div
+                class="text-xs text-white bg-white/10 px-2 py-1 rounded"
+                id="booking-time"
+              >
+                ...
+              </div>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="booking-id" />
+
+        <div class="grid grid-cols-2 gap-3 pt-6 mt-6 border-t border-white/10">
+          <button
+            onclick="handleDeleteBookingFromModal()"
+            class="col-span-2 px-4 py-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl font-bold text-sm transition border border-red-500/20"
+          >
+            <i class="fa-solid fa-trash mr-2"></i> Supprimer le rendez-vous
+          </button>
+          <button
+            onclick="handleChangeStatus('confirmed')"
+            id="btn-confirm"
+            class="px-4 py-3 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-500/20"
+          >
+            Confirmer
+          </button>
+          <button
+            onclick="handleChangeStatus('finished')"
+            id="btn-finish"
+            class="px-4 py-3 bg-slate-700 text-white hover:bg-slate-600 rounded-xl font-bold text-sm transition"
+          >
+            Terminer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-confirm" class="modal-backdrop z-[300]">
+      <div
+        class="glass-modal p-8 border-red-500/30 max-w-sm text-center modal-content"
+      >
+        <div
+          class="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 text-3xl shadow-[0_0_30px_rgba(239,68,68,0.2)]"
+        >
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-2">Êtes-vous sûr ?</h3>
+        <p class="text-slate-400 text-sm mb-8 px-4" id="confirm-message">
+          Cette action est irréversible.
+        </p>
+
+        <div class="flex gap-4">
+          <button
+            onclick="closeModal('modal-confirm')"
+            class="flex-1 py-3 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-white/5 transition"
+          >
+            Annuler
+          </button>
+          <button
+            id="btn-confirm-action"
+            class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition shadow-lg shadow-red-500/20"
+          >
+            Confirmer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[400] flex flex-col gap-3 pointer-events-none"
+    ></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.style.display = "flex";
+      });
+    </script>
+  </body>
+</html>

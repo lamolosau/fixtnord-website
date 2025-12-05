@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fixt. - Installation CarPlay & Auto Tech Nord</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+      /* --- ANIMATIONS & STYLES SPÉCIFIQUES INDEX --- */
+      .text-gradient {
+        background: linear-gradient(135deg, #002050 0%, #5475ff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .float-anim {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-15px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .tech-pattern {
+        background-image: radial-gradient(#5475ff 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.1;
+      }
+
+      /* Styles pour les modales légales */
+      .legal-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+      }
+
+      .legal-content {
+        background: #fff;
+        width: 90%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 2rem;
+        border-radius: 1rem;
+        position: relative;
+        color: #334155;
+      }
+
+      .close-legal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #94a3b8;
+      }
+
+      .close-legal:hover {
+        color: #ef4444;
+      }
+
+      /* Animation du défilement infini (Témoignages) */
+      .scroll-container {
+        mask-image: linear-gradient(
+          to right,
+          transparent,
+          black 10%,
+          black 90%,
+          transparent
+        );
+        -webkit-mask-image: linear-gradient(
+          to right,
+          transparent,
+          black 10%,
+          black 90%,
+          transparent
+        );
+      }
+
+      .scrolling-wrapper {
+        display: flex;
+        gap: 2rem;
+        width: max-content;
+        animation: scrollLeft 35s linear infinite;
+      }
+
+      .scrolling-wrapper:hover {
+        animation-play-state: paused;
+      }
+
+      @keyframes scrollLeft {
+        to {
+          transform: translateX(-50%);
+        }
+      }
+    </style>
+  </head>
+  <body class="flex flex-col min-h-screen font-sans text-slate-800">
+    <nav
+      class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100/50 transition-all"
+    >
+      <div
+        class="w-full py-4 px-8 flex justify-between items-center max-w-7xl mx-auto relative"
+      >
+        <div class="flex items-center">
+          <a
+            href="index.html"
+            class="hover:opacity-80 transition absolute top-1/2 -translate-y-1/2 left-8"
+          >
+            <img
+              src="img/logo.png"
+              alt="Fixt Logo"
+              class="h-32 w-auto object-contain drop-shadow-md"
+            />
+          </a>
+        </div>
+
+        <div class="flex gap-8 items-center">
+          <a
+            href="#services"
+            class="text-slate-600 hover:text-[#5475FF] font-semibold hidden md:block transition-colors"
+            >Services</a
+          >
+          <a
+            href="about.html"
+            class="text-slate-600 hover:text-[#5475FF] font-semibold hidden md:block transition-colors"
+            >À propos</a
+          >
+          <a
+            href="booking.html"
+            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm"
+          >
+            Prendre RDV
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <header
+        class="max-w-7xl mx-auto px-8 pt-32 pb-20 lg:pt-48 lg:pb-32 flex flex-col md:flex-row items-center gap-16"
+      >
+        <div class="md:w-1/2 space-y-8 fade-in">
+          <div
+            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-[#5475FF] rounded-full text-sm font-bold tracking-wide"
+          >
+            <span
+              class="w-2 h-2 rounded-full bg-[#5475FF] animate-pulse"
+            ></span>
+            DISPONIBLE SUR DOUAI & ENVIRONS
+          </div>
+          <h1
+            class="text-6xl md:text-7xl font-extrabold leading-tight tracking-tight text-[#002050]"
+          >
+            Votre voiture,<br />
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-[#5475FF] to-blue-400"
+              >connectée.</span
+            >
+          </h1>
+          <p class="text-xl text-slate-500 max-w-lg leading-relaxed">
+            Transformez votre véhicule avec CarPlay et Android Auto. Une
+            installation professionnelle, garantie et invisible en moins de 2
+            heures.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <a
+              href="booking.html"
+              class="btn-primary px-8 py-4 rounded-2xl font-bold text-lg text-center shadow-xl shadow-blue-100 hover:shadow-2xl transition-all"
+            >
+              Voir les créneaux
+            </a>
+            <a
+              href="#services"
+              class="px-8 py-4 rounded-2xl font-bold text-lg text-[#002050] border-2 border-slate-100 hover:border-[#002050] hover:bg-white text-center transition-all"
+            >
+              Découvrir les offres
+            </a>
+          </div>
+          <div
+            class="pt-8 flex items-center gap-6 text-sm font-bold text-slate-400 border-t border-slate-100 mt-8"
+          >
+            <div class="flex items-center gap-2">
+              <i
+                class="fa-brands fa-apple text-2xl text-[#002050] mt-[-2px]"
+              ></i>
+              CarPlay
+            </div>
+            <div class="flex items-center gap-2">
+              <i
+                class="fa-brands fa-android text-2xl text-[#002050] mt-[-2px]"
+              ></i>
+              Android Auto
+            </div>
+            <div class="flex items-center gap-2 ml-auto text-orange-400">
+              <i class="fa-solid fa-star"></i> 4.9/5
+            </div>
+          </div>
+        </div>
+
+        <div class="md:w-1/2 relative z-0">
+          <div
+            class="absolute inset-0 bg-gradient-to-tr from-blue-100 to-white rounded-full blur-3xl opacity-60 animate-pulse"
+          ></div>
+          <div
+            class="relative bg-white rounded-[2.5rem] p-4 shadow-2xl border border-slate-100 float-anim"
+          >
+            <div
+              class="bg-slate-900 rounded-[2rem] aspect-video flex flex-col items-center justify-center relative overflow-hidden group"
+            >
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-slate-800 to-black opacity-90"
+              ></div>
+              <div
+                class="grid grid-cols-4 gap-4 z-10 opacity-80 group-hover:scale-105 transition duration-700"
+              >
+                <div class="w-12 h-12 bg-[#5475FF] rounded-2xl"></div>
+                <div class="w-12 h-12 bg-green-500 rounded-2xl"></div>
+                <div class="w-12 h-12 bg-white rounded-2xl"></div>
+                <div class="w-12 h-12 bg-red-500 rounded-2xl"></div>
+                <div class="w-12 h-12 bg-purple-500 rounded-2xl"></div>
+                <div class="w-12 h-12 bg-orange-500 rounded-2xl"></div>
+              </div>
+              <div
+                class="absolute bottom-8 text-white font-mono text-xs opacity-50"
+              >
+                System Active
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section id="services" class="bg-slate-50 py-24 relative overflow-hidden">
+        <div
+          class="absolute -left-20 top-20 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50"
+        ></div>
+
+        <div class="max-w-7xl mx-auto px-8 relative z-10">
+          <div class="text-center mb-16 max-w-2xl mx-auto">
+            <h2 class="text-4xl font-extrabold text-[#002050] mb-4">
+              Nos solutions expertes
+            </h2>
+            <p class="text-slate-500 text-lg">
+              Nous n'installons que du matériel premium, testé et approuvé pour
+              garantir la sécurité de votre véhicule.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-8">
+            <div
+              class="bg-white p-10 rounded-3xl shadow-sm hover:shadow-2xl transition duration-300 group border border-slate-100 hover:border-blue-100 flex flex-col h-full"
+            >
+              <div
+                class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-[#5475FF] text-3xl mb-8 group-hover:scale-110 transition duration-300"
+              >
+                <i class="fa-solid fa-mobile-screen-button"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-[#002050] mb-3">
+                Interface CarPlay
+              </h3>
+              <p class="text-slate-500 mb-8 leading-relaxed">
+                Installation du module sans fil sur votre écran d'origine.
+                Compatible commandes au volant.
+              </p>
+              <div
+                class="flex justify-between items-center pt-8 border-t border-slate-50 mt-auto"
+              >
+                <span class="text-2xl font-bold text-[#002050]">200€</span>
+                <a
+                  href="booking.html"
+                  class="text-[#5475FF] font-bold hover:underline"
+                  >Réserver <i class="fa-solid fa-arrow-right ml-1"></i
+                ></a>
+              </div>
+            </div>
+
+            <div
+              class="bg-white p-10 rounded-3xl shadow-sm hover:shadow-2xl transition duration-300 group border border-slate-100 hover:border-blue-100 flex flex-col h-full"
+            >
+              <div
+                class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-[#5475FF] text-3xl mb-8 group-hover:scale-110 transition duration-300"
+              >
+                <i class="fa-solid fa-video"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-[#002050] mb-3">
+                Caméra de Recul
+              </h3>
+              <p class="text-slate-500 mb-8 leading-relaxed">
+                Intégration OEM avec lignes directrices dynamiques. S'active
+                automatiquement.
+              </p>
+              <div
+                class="flex justify-between items-center pt-8 border-t border-slate-50 mt-auto"
+              >
+                <span class="text-2xl font-bold text-[#002050]">150€</span>
+                <a
+                  href="booking.html"
+                  class="text-[#5475FF] font-bold hover:underline"
+                  >Réserver <i class="fa-solid fa-arrow-right ml-1"></i
+                ></a>
+              </div>
+            </div>
+
+            <div
+              class="bg-white p-10 rounded-3xl shadow-sm hover:shadow-2xl transition duration-300 group border border-slate-100 hover:border-blue-100 flex flex-col h-full"
+            >
+              <div
+                class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-[#5475FF] text-3xl mb-8 group-hover:scale-110 transition duration-300"
+              >
+                <i class="fa-solid fa-laptop-code"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-[#002050] mb-3">
+                Coding & Diag
+              </h3>
+              <p class="text-slate-500 mb-8 leading-relaxed">
+                Déblocage d'options cachées (Video in motion, AMG menu...) et
+                diagnostic complet.
+              </p>
+              <div
+                class="flex justify-between items-center pt-8 border-t border-slate-50 mt-auto"
+              >
+                <span class="text-2xl font-bold text-[#002050]">80€</span>
+                <a
+                  href="booking.html"
+                  class="text-[#5475FF] font-bold hover:underline"
+                  >Réserver <i class="fa-solid fa-arrow-right ml-1"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="py-24 px-4">
+        <div
+          class="max-w-6xl mx-auto relative rounded-[3rem] overflow-hidden shadow-2xl shadow-blue-900/20"
+        >
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-[#002050] to-[#001025] z-0"
+          ></div>
+          <div class="absolute inset-0 tech-pattern z-0"></div>
+          <div
+            class="absolute -top-24 -right-24 w-96 h-96 bg-[#5475FF] rounded-full blur-[100px] opacity-30"
+          ></div>
+          <div
+            class="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-600 rounded-full blur-[100px] opacity-20"
+          ></div>
+
+          <div
+            class="relative z-10 flex flex-col md:flex-row items-center justify-between p-12 md:p-20 gap-10"
+          >
+            <div class="md:w-2/3 text-left">
+              <span
+                class="text-[#5475FF] font-bold tracking-wider uppercase text-sm mb-2 block"
+                >Ne perdez plus de temps</span
+              >
+              <h2
+                class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight"
+              >
+                Prêt à moderniser votre conduite ?
+              </h2>
+              <p class="text-blue-100 text-lg max-w-lg mb-8">
+                Rejoignez plus de 500 clients satisfaits dans le Nord.
+                Sélectionnez votre véhicule, choisissez votre créneau, on
+                s'occupe du reste.
+              </p>
+              <div class="flex flex-wrap gap-4">
+                <div
+                  class="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm border border-white/10"
+                >
+                  <i class="fa-solid fa-check text-[#5475FF]"></i> Garantie 30
+                  jours
+                </div>
+                <div
+                  class="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm border border-white/10"
+                >
+                  <i class="fa-solid fa-check text-[#5475FF]"></i> Paiement
+                  sécurisé
+                </div>
+              </div>
+            </div>
+
+            <div class="md:w-1/3 flex justify-center md:justify-end">
+              <a
+                href="booking.html"
+                class="group relative inline-flex items-center justify-center px-8 py-5 text-lg font-bold text-[#002050] bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]"
+              >
+                <span class="mr-2">Réserver mon créneau</span>
+                <i
+                  class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"
+                ></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="py-20 bg-slate-50 overflow-hidden border-t border-slate-100"
+      >
+        <div class="max-w-7xl mx-auto px-8 mb-12 text-center">
+          <h2 class="text-3xl font-bold text-[#002050] mb-2">
+            Ils nous font confiance
+          </h2>
+          <div
+            class="flex justify-center items-center gap-2 text-orange-400 text-sm font-bold"
+          >
+            <div class="flex">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+              ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+              ><i class="fa-solid fa-star"></i>
+            </div>
+            <span class="text-slate-400">(4.9/5 sur Google)</span>
+          </div>
+        </div>
+
+        <div class="scroll-container w-full max-w-[100vw] overflow-hidden py-4">
+          <div class="scrolling-wrapper pl-8">
+            <div
+              class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0"
+            >
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold"
+                >
+                  K
+                </div>
+                <div>
+                  <div class="font-bold text-[#002050]">Karim B.</div>
+                  <div class="text-xs text-slate-400">
+                    Mercedes Classe A (2016)
+                  </div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                  <i class="fa-solid fa-star"></i> 5/5
+                </div>
+              </div>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                "Franchement propre. Je pensais devoir changer l'écran complet,
+                mais le module est invisible. Waze marche nickel, merci
+                l'équipe."
+              </p>
+            </div>
+
+            <div
+              class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0"
+            >
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold"
+                >
+                  S
+                </div>
+                <div>
+                  <div class="font-bold text-[#002050]">Sophie D.</div>
+                  <div class="text-xs text-slate-400">Audi A3 (2017)</div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                  <i class="fa-solid fa-star"></i> 5/5
+                </div>
+              </div>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                "Rendez-vous pris la veille, installé en 1h30 à Douai. Le
+                technicien est super sympa et m'a tout expliqué. Je recommande
+                !"
+              </p>
+            </div>
+
+            <div
+              class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0"
+            >
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold"
+                >
+                  T
+                </div>
+                <div>
+                  <div class="font-bold text-[#002050]">Thomas M.</div>
+                  <div class="text-xs text-slate-400">Porsche Macan</div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                  <i class="fa-solid fa-star"></i> 5/5
+                </div>
+              </div>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                "J'avais peur pour la garantie de ma voiture, mais
+                l'installation est vraiment non-intrusive. Avoir CarPlay sans
+                fil quel bonheur."
+              </p>
+            </div>
+
+            <div
+              class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0"
+            >
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold"
+                >
+                  L
+                </div>
+                <div>
+                  <div class="font-bold text-[#002050]">Lucas P.</div>
+                  <div class="text-xs text-slate-400">BMW Série 1</div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                  <i class="fa-solid fa-star"></i> 4.5/5
+                </div>
+              </div>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                "Prix imbattable comparé à la concession qui me demandait 800€.
+                L'interface est fluide, rien à dire."
+              </p>
+            </div>
+
+            <div
+              class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0"
+            >
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold"
+                >
+                  C
+                </div>
+                <div>
+                  <div class="font-bold text-[#002050]">Camille R.</div>
+                  <div class="text-xs text-slate-400">Mini Cooper</div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                  <i class="fa-solid fa-star"></i> 5/5
+                </div>
+              </div>
+              <p class="text-slate-500 text-sm leading-relaxed">
+                "Enfin Spotify sur l'écran d'origine ! L'installation a été
+                ultra rapide, top service sur le secteur."
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer
+      class="bg-[#000d21] text-slate-400 pt-20 pb-10 border-t border-white/5"
+    >
+      <div class="max-w-7xl mx-auto px-8">
+        <div class="grid md:grid-cols-4 gap-12 mb-16">
+          <div class="col-span-1 md:col-span-2 space-y-6">
+            <a href="#" class="block opacity-90 hover:opacity-100 transition">
+              <img
+                src="img/logo.png"
+                alt="Fixt Logo"
+                class="h-16 w-auto object-contain brightness-0 invert opacity-80"
+              />
+            </a>
+            <p class="text-slate-500 max-w-sm text-sm leading-relaxed">
+              Le spécialiste n°1 dans le Nord-Pas-de-Calais de l'intégration
+              multimédia automobile. Nous apportons les dernières technologies
+              dans votre véhicule actuel à Douai et ses environs.
+            </p>
+            <div class="flex gap-4">
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#5475FF] hover:text-white transition-all"
+                ><i class="fa-brands fa-instagram"></i
+              ></a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#5475FF] hover:text-white transition-all"
+                ><i class="fa-brands fa-tiktok"></i
+              ></a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#5475FF] hover:text-white transition-all"
+                ><i class="fa-brands fa-facebook-f"></i
+              ></a>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-white font-bold mb-6">Navigation</h4>
+            <ul class="space-y-4 text-sm">
+              <li>
+                <a href="index.html" class="hover:text-[#5475FF] transition"
+                  >Accueil</a
+                >
+              </li>
+              <li>
+                <a href="#services" class="hover:text-[#5475FF] transition"
+                  >Nos Services</a
+                >
+              </li>
+              <li>
+                <a href="booking.html" class="hover:text-[#5475FF] transition"
+                  >Prendre Rendez-vous</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-white font-bold mb-6">Nous contacter</h4>
+            <ul class="space-y-4 text-sm">
+              <li class="flex items-start gap-3">
+                <i class="fa-solid fa-location-dot mt-1 text-[#5475FF]"></i>
+                <span>23 rue Léon Gambetta,<br />59500 Douai</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-envelope text-[#5475FF]"></i>
+                <a
+                  href="mailto:contact@fixnord.fr"
+                  class="hover:text-white transition"
+                  >contact@fixnord.fr</a
+                >
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-phone text-[#5475FF]"></i>
+                <a href="tel:+33783728977" class="hover:text-white transition"
+                  >07 83 72 89 77</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600"
+        >
+          <p>&copy; 2023 Fixt. Tous droits réservés.</p>
+          <div class="flex gap-6">
+            <button
+              onclick="openLegal('mentions')"
+              class="hover:text-slate-400"
+            >
+              Mentions Légales
+            </button>
+            <button onclick="openLegal('cgv')" class="hover:text-slate-400">
+              CGV
+            </button>
+            <button onclick="openLegal('privacy')" class="hover:text-slate-400">
+              Politique de Confidentialité
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div
+      id="legal-modal"
+      class="legal-modal"
+      onclick="if(event.target===this) closeLegal()"
+    >
+      <div class="legal-content">
+        <span onclick="closeLegal()" class="close-legal">&times;</span>
+        <div id="legal-body"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script>
+      // Contenu des textes légaux
+      const legalTexts = {
+        mentions: `
+            <h2 class="text-2xl font-bold mb-4 text-[#002050]">Mentions Légales</h2>
+            <p class="mb-2"><strong>Éditeur du site :</strong> Fixt Nord</p>
+            <p class="mb-2"><strong>Adresse :</strong> 23 rue Léon Gambetta, 59500 Douai</p>
+            <p class="mb-2"><strong>Contact :</strong> contact@fixnord.fr | 07 83 72 89 77</p>
+            <p class="mb-4"><strong>Hébergeur :</strong> Le site est hébergé par un prestataire tiers.</p>
+            <p class="text-sm text-slate-500">Conformément aux dispositions des articles 6-III et 19 de la Loi n° 2004-575 du 21 juin 2004 pour la Confiance dans l'économie numérique.</p>
+        `,
+        cgv: `
+            <h2 class="text-2xl font-bold mb-4 text-[#002050]">Conditions Générales de Vente (CGV)</h2>
+            <h3 class="font-bold mt-4">1. Objet</h3>
+            <p class="mb-2">Les présentes CGV régissent les ventes de prestations de services (installation CarPlay, diagnostic, codage) effectuées par Fixt Nord.</p>
+            <h3 class="font-bold mt-4">2. Prix et Paiement</h3>
+            <p class="mb-2">Les prix sont indiqués en euros. Le paiement est exigible immédiatement à la commande ou à la fin de la prestation selon accord.</p>
+            <h3 class="font-bold mt-4">3. Prestations</h3>
+            <p class="mb-2">Fixt Nord s'engage à fournir les services avec diligence et selon les règles de l'art. Toutefois, s'agissant de modifications électroniques, le client reconnaît avoir été informé des spécificités liées à son véhicule.</p>
+            <h3 class="font-bold mt-4">4. Garantie</h3>
+            <p class="mb-2">Nos installations matérielles sont garanties 30 jours pièces et main d'œuvre, hors casse ou mauvaise manipulation.</p>
+        `,
+        privacy: `
+            <h2 class="text-2xl font-bold mb-4 text-[#002050]">Politique de Confidentialité</h2>
+            <p class="mb-2">Fixt Nord accorde une grande importance à la protection de votre vie privée.</p>
+            <h3 class="font-bold mt-4">Données collectées</h3>
+            <p class="mb-2">Nous collectons les informations suivantes lors de votre réservation : Nom, Prénom, Adresse email, Numéro de téléphone, Modèle de véhicule. Ces données sont nécessaires à la bonne exécution de nos services.</p>
+            <h3 class="font-bold mt-4">Utilisation des données</h3>
+            <p class="mb-2">Vos données ne sont utilisées que pour gérer vos rendez-vous et vous contacter en cas de besoin. Elles ne sont jamais vendues à des tiers.</p>
+            <h3 class="font-bold mt-4">Vos droits</h3>
+            <p class="mb-2">Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Contactez-nous à contact@fixnord.fr pour exercer ce droit.</p>
+        `,
+      };
+
+      function openLegal(type) {
+        const modal = document.getElementById("legal-modal");
+        const body = document.getElementById("legal-body");
+        body.innerHTML = legalTexts[type] || "<p>Contenu non disponible.</p>";
+        modal.style.display = "flex";
+      }
+
+      function closeLegal() {
+        document.getElementById("legal-modal").style.display = "none";
+      }
+    </script>
+  </body>
+</html>

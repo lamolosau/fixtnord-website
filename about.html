@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>À Propos - Fixt. Nord</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+      /* --- THEME SPECIFIQUE ABOUT --- */
+      body {
+        background-color: #f8fafc;
+        background-image: radial-gradient(
+            at 0% 0%,
+            rgba(84, 117, 255, 0.1) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 100% 100%,
+            rgba(168, 85, 247, 0.1) 0px,
+            transparent 50%
+          );
+        background-attachment: fixed;
+      }
+
+      /* Effet Verre sur fond clair (Light Glassmorphism) */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+      }
+
+      .glass-card:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px 0 rgba(31, 38, 135, 0.1);
+      }
+
+      /* Pattern tech subtil */
+      .tech-bg {
+        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+        background-size: 30px 30px;
+      }
+
+      /* Styles pour les modales légales (identique index) */
+      .legal-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+      }
+      .legal-content {
+        background: #fff;
+        width: 90%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 2rem;
+        border-radius: 1rem;
+        position: relative;
+        color: #334155;
+      }
+      .close-legal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #94a3b8;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col min-h-screen font-sans text-slate-800">
+    <nav
+      class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100/50 transition-all"
+    >
+      <div
+        class="w-full py-4 px-8 flex justify-between items-center max-w-7xl mx-auto relative"
+      >
+        <div class="flex items-center">
+          <a
+            href="index.html"
+            class="hover:opacity-80 transition absolute top-1/2 -translate-y-1/2 left-8"
+          >
+            <img
+              src="img/logo.png"
+              alt="Fixt Logo"
+              class="h-32 w-auto object-contain drop-shadow-md"
+            />
+          </a>
+        </div>
+
+        <div class="flex gap-8 items-center">
+          <a
+            href="index.html#services"
+            class="text-slate-600 hover:text-[#5475FF] font-semibold hidden md:block transition-colors"
+            >Services</a
+          >
+          <a
+            href="about.html"
+            class="text-slate-600 hover:text-[#5475FF] font-semibold hidden md:block transition-colors"
+            >À propos</a
+          >
+          <a
+            href="booking.html"
+            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm"
+          >
+            Prendre RDV
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-grow pt-32 pb-20">
+      <section class="max-w-7xl mx-auto px-8 mb-20">
+        <div class="text-center max-w-3xl mx-auto fade-in">
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 text-[#5475FF] text-3xl mb-8 shadow-inner"
+          >
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <h1
+            class="text-5xl md:text-6xl font-extrabold text-[#002050] mb-6 tracking-tight"
+          >
+            Moderniser, sans <br />
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-[#5475FF] to-blue-400"
+              >dénaturer.</span
+            >
+          </h1>
+          <p class="text-xl text-slate-500 leading-relaxed">
+            Fixt est né d'un constat simple : votre voiture fonctionne
+            parfaitement, mais sa technologie est obsolète. Nous comblons ce
+            fossé technologique.
+          </p>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-8 mb-24">
+        <div
+          class="glass-card rounded-[3rem] p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-blue-100 to-purple-100 rounded-full blur-3xl opacity-50 -z-10 translate-x-1/2 -translate-y-1/2"
+          ></div>
+
+          <div class="md:w-1/2 space-y-6 relative z-10">
+            <h2 class="text-3xl font-bold text-[#002050]">Notre Mission</h2>
+            <div class="w-20 h-1 bg-[#5475FF] rounded-full"></div>
+            <p class="text-slate-600 leading-relaxed">
+              Basé au cœur du <strong>Nord-Pas-de-Calais</strong>, Fixt est le
+              spécialiste local de l'intégration multimédia automobile.
+            </p>
+            <p class="text-slate-600 leading-relaxed">
+              Nous croyons que vous ne devriez pas avoir à acheter une voiture
+              neuve juste pour profiter de
+              <strong>Waze, Spotify ou Google Maps</strong> sur votre écran.
+              Notre approche est chirurgicale : nous installons des modules
+              invisibles qui s'interfacent avec votre système d'origine.
+            </p>
+            <p class="text-slate-600 font-medium">
+              <i class="fa-solid fa-check text-[#5475FF] mr-2"></i> Pas de
+              câbles apparents.<br />
+              <i class="fa-solid fa-check text-[#5475FF] mr-2"></i> Pas de
+              supports ventouse disgracieux.<br />
+              <i class="fa-solid fa-check text-[#5475FF] mr-2"></i> Juste votre
+              voiture, en mieux.
+            </p>
+          </div>
+
+          <div class="md:w-1/2 w-full">
+            <div
+              class="relative h-80 w-full bg-[#002050] rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden tech-bg group"
+            >
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-[#002050] via-transparent to-transparent opacity-80"
+              ></div>
+
+              <div
+                class="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl text-white text-center transform group-hover:scale-105 transition duration-500"
+              >
+                <div class="text-4xl mb-2">
+                  <i class="fa-brands fa-apple"></i>
+                  <span class="mx-2 text-slate-400">|</span>
+                  <i class="fa-brands fa-android"></i>
+                </div>
+                <div
+                  class="text-xs uppercase tracking-widest font-bold text-blue-300"
+                >
+                  System Update
+                </div>
+                <div class="mt-2 text-sm font-mono text-emerald-400">
+                  Installation Complete
+                </div>
+              </div>
+
+              <div
+                class="absolute w-96 h-96 border border-white/5 rounded-full animate-[spin_10s_linear_infinite]"
+              ></div>
+              <div
+                class="absolute w-64 h-64 border border-blue-500/20 rounded-full animate-[spin_15s_linear_infinite_reverse]"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-8 mb-20">
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="glass-card p-8 rounded-3xl transition duration-300">
+            <div
+              class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-[#5475FF] text-xl mb-6"
+            >
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#002050] mb-3">
+              Expertise Technique
+            </h3>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              Chaque véhicule est différent. Nous connaissons les spécificités
+              de démontage des marques allemandes, françaises et asiatiques pour
+              ne laisser aucune trace.
+            </p>
+          </div>
+
+          <div class="glass-card p-8 rounded-3xl transition duration-300">
+            <div
+              class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 text-xl mb-6"
+            >
+              <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#002050] mb-3">
+              Proximité (Douai)
+            </h3>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              Nous vous accueillons au
+              <strong>23 rue Léon Gambetta, 59500 Douai</strong>. Un service
+              local, humain, loin des plateformes anonymes.
+            </p>
+          </div>
+
+          <div class="glass-card p-8 rounded-3xl transition duration-300">
+            <div
+              class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-500 text-xl mb-6"
+            >
+              <i class="fa-solid fa-shield-heart"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#002050] mb-3">
+              Sérénité Totale
+            </h3>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              Garantie 2 ans sur le matériel. Si un module présente un défaut,
+              nous le remplaçons. Support technique disponible par téléphone.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-4xl mx-auto px-8 text-center">
+        <div
+          class="bg-[#002050] rounded-3xl p-10 md:p-16 relative overflow-hidden shadow-2xl shadow-blue-900/30"
+        >
+          <div
+            class="absolute top-0 right-0 w-64 h-64 bg-[#5475FF] rounded-full blur-[80px] opacity-30"
+          ></div>
+          <div class="relative z-10">
+            <h2 class="text-3xl font-bold text-white mb-6">Convaincu ?</h2>
+            <p class="text-blue-200 mb-8 max-w-lg mx-auto">
+              Consultez nos disponibilités en temps réel et réservez votre
+              créneau d'installation en moins de 2 minutes.
+            </p>
+            <a
+              href="booking.html"
+              class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-[#002050] bg-white rounded-xl hover:bg-blue-50 transition-all shadow-lg hover:scale-105"
+            >
+              Accéder au planning
+              <i class="fa-solid fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer
+      class="bg-[#000d21] text-slate-400 pt-20 pb-10 border-t border-white/5"
+    >
+      <div class="max-w-7xl mx-auto px-8">
+        <div class="grid md:grid-cols-4 gap-12 mb-16">
+          <div class="col-span-1 md:col-span-2 space-y-6">
+            <a
+              href="index.html"
+              class="block opacity-90 hover:opacity-100 transition"
+            >
+              <img
+                src="img/logo.png"
+                alt="Fixt Logo"
+                class="h-16 w-auto object-contain brightness-0 invert opacity-80"
+              />
+            </a>
+            <p class="text-slate-500 max-w-sm text-sm leading-relaxed">
+              Le spécialiste n°1 dans le Nord-Pas-de-Calais de l'intégration
+              multimédia automobile. Nous apportons les dernières technologies
+              dans votre véhicule actuel à Douai et ses environs.
+            </p>
+            <div class="flex gap-4">
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#5475FF] hover:text-white transition-all"
+                ><i class="fa-brands fa-instagram"></i
+              ></a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#5475FF] hover:text-white transition-all"
+                ><i class="fa-brands fa-tiktok"></i
+              ></a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#5475FF] hover:text-white transition-all"
+                ><i class="fa-brands fa-facebook-f"></i
+              ></a>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-white font-bold mb-6">Navigation</h4>
+            <ul class="space-y-4 text-sm">
+              <li>
+                <a href="index.html" class="hover:text-[#5475FF] transition"
+                  >Accueil</a
+                >
+              </li>
+              <li>
+                <a
+                  href="index.html#services"
+                  class="hover:text-[#5475FF] transition"
+                  >Nos Services</a
+                >
+              </li>
+              <li>
+                <a href="booking.html" class="hover:text-[#5475FF] transition"
+                  >Prendre Rendez-vous</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-white font-bold mb-6">Nous contacter</h4>
+            <ul class="space-y-4 text-sm">
+              <li class="flex items-start gap-3">
+                <i class="fa-solid fa-location-dot mt-1 text-[#5475FF]"></i>
+                <span>23 rue Léon Gambetta,<br />59500 Douai</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-envelope text-[#5475FF]"></i>
+                <a
+                  href="mailto:contact@fixnord.fr"
+                  class="hover:text-white transition"
+                  >contact@fixnord.fr</a
+                >
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-phone text-[#5475FF]"></i>
+                <a href="tel:+33783728977" class="hover:text-white transition"
+                  >07 83 72 89 77</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600"
+        >
+          <p>&copy; 2023 Fixt. Tous droits réservés.</p>
+          <div class="flex gap-6">
+            <button
+              onclick="openLegal('mentions')"
+              class="hover:text-slate-400"
+            >
+              Mentions Légales
+            </button>
+            <button onclick="openLegal('cgv')" class="hover:text-slate-400">
+              CGV
+            </button>
+            <button onclick="openLegal('privacy')" class="hover:text-slate-400">
+              Politique de Confidentialité
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div
+      id="legal-modal"
+      class="legal-modal"
+      onclick="if(event.target===this) closeLegal()"
+    >
+      <div class="legal-content">
+        <span onclick="closeLegal()" class="close-legal">&times;</span>
+        <div id="legal-body"></div>
+      </div>
+    </div>
+
+    <script>
+      const legalTexts = {
+        mentions: `
+                <h2 class="text-2xl font-bold mb-4 text-[#002050]">Mentions Légales</h2>
+                <p class="mb-2"><strong>Éditeur du site :</strong> Fixt Nord</p>
+                <p class="mb-2"><strong>Adresse :</strong> 23 rue Léon Gambetta, 59500 Douai</p>
+                <p class="mb-2"><strong>Contact :</strong> contact@fixnord.fr | 07 83 72 89 77</p>
+                <p class="mb-4"><strong>Hébergeur :</strong> Le site est hébergé par un prestataire tiers.</p>
+            `,
+        cgv: `
+                <h2 class="text-2xl font-bold mb-4 text-[#002050]">Conditions Générales de Vente</h2>
+                <p class="mb-2">Les tarifs incluent la pose et le matériel. Garantie 2 ans.</p>
+            `,
+        privacy: `
+                <h2 class="text-2xl font-bold mb-4 text-[#002050]">Politique de Confidentialité</h2>
+                <p class="mb-2">Vos données servent uniquement à la gestion du rendez-vous.</p>
+            `,
+      };
+
+      function openLegal(type) {
+        const modal = document.getElementById("legal-modal");
+        const body = document.getElementById("legal-body");
+        body.innerHTML = legalTexts[type] || "<p>Contenu non disponible.</p>";
+        modal.style.display = "flex";
+      }
+
+      function closeLegal() {
+        document.getElementById("legal-modal").style.display = "none";
+      }
+    </script>
+  </body>
+</html>
