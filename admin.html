@@ -107,12 +107,16 @@
       }
     </style>
   </head>
-  <body class="flex h-screen font-sans antialiased">
+  <body
+    class="flex h-screen font-sans antialiased bg-[#020617] overflow-hidden selection:bg-blue-500/30"
+  >
     <div
       class="fixed top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#5475FF] rounded-full blur-[150px] opacity-10 pointer-events-none"
     ></div>
 
-    <aside class="w-20 lg:w-72 flex-shrink-0 flex flex-col glass-sidebar z-50">
+    <aside
+      class="hidden lg:flex w-72 flex-shrink-0 flex-col glass-sidebar z-50 transition-all duration-300"
+    >
       <div
         class="h-32 flex items-center justify-center border-b border-white/5"
       >
@@ -128,40 +132,40 @@
           id="btn-dashboard"
           class="nav-btn active w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5"
         >
-          <i class="fa-solid fa-chart-pie"></i>
-          <span class="hidden lg:block font-bold text-sm">Vue d'ensemble</span>
+          <i class="fa-solid fa-chart-pie w-6"></i>
+          <span class="font-bold text-sm">Vue d'ensemble</span>
         </button>
         <button
           onclick="switchTab('bookings')"
           id="btn-bookings"
           class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5"
         >
-          <i class="fa-solid fa-address-book"></i>
-          <span class="hidden lg:block font-bold text-sm">Réservations</span>
+          <i class="fa-solid fa-address-book w-6"></i>
+          <span class="font-bold text-sm">Réservations</span>
         </button>
         <button
           onclick="switchTab('calendar')"
           id="btn-calendar"
           class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5"
         >
-          <i class="fa-regular fa-calendar"></i>
-          <span class="hidden lg:block font-bold text-sm">Calendrier</span>
+          <i class="fa-regular fa-calendar w-6"></i>
+          <span class="font-bold text-sm">Calendrier</span>
         </button>
         <button
           onclick="switchTab('services')"
           id="btn-services"
           class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5"
         >
-          <i class="fa-solid fa-screwdriver-wrench"></i>
-          <span class="hidden lg:block font-bold text-sm">Services</span>
+          <i class="fa-solid fa-screwdriver-wrench w-6"></i>
+          <span class="font-bold text-sm">Services</span>
         </button>
         <button
           onclick="switchTab('reviews')"
           id="btn-reviews"
           class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-slate-400 hover:text-white hover:bg-white/5"
         >
-          <i class="fa-solid fa-star"></i>
-          <span class="hidden lg:block font-bold text-sm">Avis Clients</span>
+          <i class="fa-solid fa-star w-6"></i>
+          <span class="font-bold text-sm">Avis Clients</span>
         </button>
       </nav>
       <div class="p-6 border-t border-white/5">
@@ -170,9 +174,7 @@
           class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
         >
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          <span class="hidden lg:block font-bold text-xs uppercase"
-            >Déconnexion</span
-          >
+          <span class="font-bold text-xs uppercase">Déconnexion</span>
         </button>
       </div>
     </aside>
@@ -180,25 +182,39 @@
     <main
       class="flex-1 flex flex-col relative overflow-hidden z-10 bg-[#020617]"
     >
-      <header class="h-24 flex items-center justify-between px-8 z-40">
-        <h1 class="text-2xl font-bold text-white">Tableau de bord</h1>
+      <header
+        class="h-20 md:h-24 flex items-center justify-between px-6 md:px-8 z-40 border-b border-white/5 lg:border-none bg-[#020617]/80 backdrop-blur-md lg:bg-transparent"
+      >
+        <div class="lg:hidden">
+          <img
+            src="img/logo.png"
+            alt="Fixt"
+            class="h-8 w-auto brightness-0 invert"
+          />
+        </div>
+        <h1 class="hidden lg:block text-2xl font-bold text-white">
+          Tableau de bord
+        </h1>
         <div
-          class="text-[10px] text-emerald-400 font-bold flex items-center gap-2"
+          class="text-[10px] text-emerald-400 font-bold flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20"
         >
           <span
             class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
           ></span>
           ONLINE
         </div>
+        <button onclick="logout()" class="lg:hidden text-red-400 text-sm">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
       </header>
 
-      <div class="flex-1 overflow-hidden relative px-8 pb-8">
+      <div class="flex-1 overflow-hidden relative pb-24 lg:pb-8">
         <div
           id="view-dashboard"
-          class="absolute inset-0 px-8 pb-8 overflow-y-auto"
+          class="absolute inset-0 px-4 md:px-8 pt-4 md:pt-0 overflow-y-auto pb-24"
         >
           <div
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8"
           >
             <div
               class="p-6 rounded-3xl bg-white/5 border border-white/5 relative overflow-hidden"
@@ -272,13 +288,13 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div
-              class="lg:col-span-2 bg-white/5 border border-white/5 p-6 rounded-3xl"
+              class="lg:col-span-2 bg-white/5 border border-white/5 p-4 md:p-6 rounded-3xl"
             >
               <h3 class="font-bold text-white mb-6">Évolution des Revenus</h3>
               <div class="h-64 w-full"><canvas id="revenueChart"></canvas></div>
             </div>
             <div
-              class="lg:col-span-1 bg-white/5 border border-white/5 p-6 rounded-3xl"
+              class="lg:col-span-1 bg-white/5 border border-white/5 p-4 md:p-6 rounded-3xl"
             >
               <h3 class="font-bold text-white mb-6">Top Prestations</h3>
               <div id="top-services-list" class="space-y-4">
@@ -303,24 +319,28 @@
                 Tout voir
               </button>
             </div>
-            <table class="w-full glass-table text-left border-collapse">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Client</th>
-                  <th>Service</th>
-                  <th>Statut</th>
-                  <th>Prix</th>
-                </tr>
-              </thead>
-              <tbody id="latest-bookings-body"></tbody>
-            </table>
+            <div class="overflow-x-auto">
+              <table
+                class="w-full glass-table text-left border-collapse whitespace-nowrap"
+              >
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Service</th>
+                    <th>Statut</th>
+                    <th>Prix</th>
+                  </tr>
+                </thead>
+                <tbody id="latest-bookings-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         <div
           id="view-bookings"
-          class="hidden-view absolute inset-0 px-8 pb-8 overflow-y-auto"
+          class="hidden-view absolute inset-0 px-4 md:px-8 pt-4 md:pt-0 overflow-y-auto pb-24"
         >
           <div
             class="rounded-3xl bg-white/5 border border-white/5 overflow-hidden"
@@ -334,35 +354,39 @@
                 Actualiser
               </button>
             </div>
-            <table class="w-full glass-table text-left border-collapse">
-              <thead>
-                <tr>
-                  <th class="text-left">Date</th>
-                  <th class="text-left">Client</th>
-                  <th class="text-left">Service</th>
-                  <th class="text-left">Statut</th>
-                  <th class="text-center w-32">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="all-bookings-table-body"></tbody>
-            </table>
+            <div class="overflow-x-auto">
+              <table
+                class="w-full glass-table text-left border-collapse whitespace-nowrap"
+              >
+                <thead>
+                  <tr>
+                    <th class="text-left">Date</th>
+                    <th class="text-left">Client</th>
+                    <th class="text-left">Service</th>
+                    <th class="text-left">Statut</th>
+                    <th class="text-center w-32">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="all-bookings-table-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         <div
           id="view-calendar"
-          class="hidden-view absolute inset-0 px-8 pb-8 flex flex-col"
+          class="hidden-view absolute inset-0 px-2 md:px-8 pb-24 flex flex-col"
         >
           <div
-            class="rounded-3xl bg-white/5 border border-white/5 flex-1 p-4 overflow-hidden relative"
+            class="rounded-3xl bg-white/5 border border-white/5 flex-1 p-2 md:p-4 overflow-hidden relative"
           >
-            <div id="calendar" class="h-full w-full"></div>
+            <div id="calendar" class="h-full w-full text-xs md:text-sm"></div>
           </div>
         </div>
 
         <div
           id="view-services"
-          class="hidden-view absolute inset-0 px-8 pb-8 overflow-y-auto"
+          class="hidden-view absolute inset-0 px-4 md:px-8 pt-4 md:pt-0 overflow-y-auto pb-24"
         >
           <div class="grid lg:grid-cols-3 gap-8">
             <div class="lg:col-span-1">
@@ -374,21 +398,21 @@
                     name="name"
                     placeholder="Nom"
                     required
-                    class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+                    class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white focus:border-[#5475FF] outline-none"
                   />
                   <input
                     type="number"
                     name="price"
                     placeholder="Prix (€)"
                     required
-                    class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+                    class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white focus:border-[#5475FF] outline-none"
                   />
                   <input
                     type="number"
                     name="duration"
                     placeholder="Durée (min)"
                     required
-                    class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+                    class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white focus:border-[#5475FF] outline-none"
                   />
                   <button
                     type="submit"
@@ -408,7 +432,7 @@
 
         <div
           id="view-reviews"
-          class="hidden-view absolute inset-0 px-8 pb-8 overflow-y-auto"
+          class="hidden-view absolute inset-0 px-4 md:px-8 pt-4 md:pt-0 overflow-y-auto pb-24"
         >
           <div
             class="rounded-3xl bg-white/5 border border-white/5 overflow-hidden"
@@ -422,27 +446,76 @@
                 Actualiser
               </button>
             </div>
-            <table class="w-full glass-table text-left border-collapse">
-              <thead>
-                <tr>
-                  <th class="text-left">Date</th>
-                  <th class="text-left">Client</th>
-                  <th class="text-left">Note</th>
-                  <th class="text-left w-1/3">Commentaire</th>
-                  <th class="text-left">Statut</th>
-                  <th class="text-center w-32">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="reviews-table-body"></tbody>
-            </table>
+            <div class="overflow-x-auto">
+              <table
+                class="w-full glass-table text-left border-collapse whitespace-nowrap"
+              >
+                <thead>
+                  <tr>
+                    <th class="text-left">Date</th>
+                    <th class="text-left">Client</th>
+                    <th class="text-left">Note</th>
+                    <th class="text-left w-1/3 min-w-[200px]">Commentaire</th>
+                    <th class="text-left">Statut</th>
+                    <th class="text-center w-32">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="reviews-table-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </main>
 
+    <nav
+      class="lg:hidden fixed bottom-0 left-0 w-full bg-[#020617]/90 backdrop-blur-xl border-t border-white/10 z-50 flex justify-around items-center px-2 py-3 safe-area-pb"
+    >
+      <button
+        onclick="switchTab('dashboard')"
+        class="mob-nav-btn active flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-[#5475FF] transition-colors"
+        data-tab="dashboard"
+      >
+        <i class="fa-solid fa-chart-pie text-xl"></i>
+        <span class="text-[10px] font-bold">Stats</span>
+      </button>
+      <button
+        onclick="switchTab('bookings')"
+        class="mob-nav-btn flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-[#5475FF] transition-colors"
+        data-tab="bookings"
+      >
+        <i class="fa-solid fa-address-book text-xl"></i>
+        <span class="text-[10px] font-bold">RDV</span>
+      </button>
+      <button
+        onclick="switchTab('calendar')"
+        class="mob-nav-btn flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-[#5475FF] transition-colors"
+        data-tab="calendar"
+      >
+        <i class="fa-regular fa-calendar text-xl"></i>
+        <span class="text-[10px] font-bold">Agenda</span>
+      </button>
+      <button
+        onclick="switchTab('services')"
+        class="mob-nav-btn flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-[#5475FF] transition-colors"
+        data-tab="services"
+      >
+        <i class="fa-solid fa-screwdriver-wrench text-xl"></i>
+        <span class="text-[10px] font-bold">Offres</span>
+      </button>
+      <button
+        onclick="switchTab('reviews')"
+        class="mob-nav-btn flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-[#5475FF] transition-colors"
+        data-tab="reviews"
+      >
+        <i class="fa-solid fa-star text-xl"></i>
+        <span class="text-[10px] font-bold">Avis</span>
+      </button>
+    </nav>
+
     <div id="modal-confirm" class="modal-backdrop z-[500]">
       <div
-        class="bg-[#0f172a] border border-white/10 p-8 rounded-2xl w-full max-w-md text-center shadow-2xl"
+        class="bg-[#0f172a] border border-white/10 p-8 rounded-2xl w-[90%] max-w-sm text-center shadow-2xl"
       >
         <h3 class="text-xl font-bold text-white mb-4">Êtes-vous sûr ?</h3>
         <p class="text-slate-400 text-sm mb-6" id="confirm-message">
@@ -467,7 +540,7 @@
 
     <div id="modal-slot" class="modal-backdrop z-[300]">
       <div
-        class="bg-[#0f172a] border border-white/10 p-8 rounded-2xl w-[400px] shadow-2xl"
+        class="bg-[#0f172a] border border-white/10 p-6 md:p-8 rounded-2xl w-[90%] max-w-sm shadow-2xl"
       >
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-xl font-bold text-white">Gérer le Créneau</h3>
@@ -483,18 +556,21 @@
           <div>
             <label class="text-xs text-slate-400 uppercase font-bold"
               >Début</label
-            ><input
+            >
+            <input
               type="datetime-local"
               id="slot-start"
-              class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+              class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-[#5475FF]"
             />
           </div>
           <div>
-            <label class="text-xs text-slate-400 uppercase font-bold">Fin</label
-            ><input
+            <label class="text-xs text-slate-400 uppercase font-bold"
+              >Fin</label
+            >
+            <input
               type="datetime-local"
               id="slot-end"
-              class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+              class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-[#5475FF]"
             />
           </div>
           <div class="flex gap-3 pt-4 border-t border-white/10 mt-4">
@@ -518,11 +594,13 @@
 
     <div id="modal-booking" class="modal-backdrop z-[300]">
       <div
-        class="glass-modal p-8 w-[500px] bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl"
+        class="glass-modal p-6 md:p-8 w-[95%] max-w-lg bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
       >
         <div class="flex justify-between items-start mb-6">
           <div>
-            <h3 class="text-2xl font-bold text-white">Détails Rendez-vous</h3>
+            <h3 class="text-xl md:text-2xl font-bold text-white">
+              Détails Rendez-vous
+            </h3>
             <p
               class="text-xs font-bold uppercase tracking-wider mt-1"
               id="modal-status-text"
@@ -540,11 +618,14 @@
 
         <input type="hidden" id="booking-id" />
         <div class="space-y-4">
-          <div class="bg-white/5 p-5 rounded-2xl border border-white/5">
+          <div class="bg-white/5 p-4 md:p-5 rounded-2xl border border-white/5">
             <div class="text-[10px] text-slate-400 uppercase font-bold mb-2">
               Client
             </div>
-            <div class="text-white font-bold text-xl" id="booking-client">
+            <div
+              class="text-white font-bold text-lg md:text-xl"
+              id="booking-client"
+            >
               ...
             </div>
             <div class="flex flex-col gap-1 mt-2 text-sm text-slate-300">
@@ -568,7 +649,12 @@
               <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
                 Véhicule
               </div>
-              <div class="text-white font-semibold" id="booking-car">...</div>
+              <div
+                class="text-white font-semibold text-sm md:text-base"
+                id="booking-car"
+              >
+                ...
+              </div>
             </div>
             <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
               <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
@@ -590,7 +676,9 @@
               <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
                 Service
               </div>
-              <div class="text-white font-medium" id="booking-service">...</div>
+              <div class="text-white font-medium text-sm" id="booking-service">
+                ...
+              </div>
             </div>
             <div class="text-right">
               <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
@@ -635,13 +723,12 @@
 
     <div
       id="toast-container"
-      class="fixed bottom-6 right-6 z-[400] flex flex-col gap-3 pointer-events-none"
+      class="fixed bottom-24 lg:bottom-6 right-6 z-[400] flex flex-col gap-3 pointer-events-none"
     ></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script type="module" src="js/app-admin.js"></script>
   </body>
 </html>

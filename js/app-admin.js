@@ -22,26 +22,45 @@ function switchTab(tabName) {
   document
     .querySelectorAll('[id^="view-"]')
     .forEach((el) => el.classList.add("hidden-view"));
-  document
-    .querySelectorAll(".nav-btn")
-    .forEach((el) => el.classList.remove("active"));
+
+  // Désactiver tous les boutons (Desktop + Mobile)
+  document.querySelectorAll(".nav-btn, .mob-nav-btn").forEach((el) => {
+    el.classList.remove("active", "text-[#5475FF]", "bg-white/5"); // Reset styles desktop/mobile
+    if (el.classList.contains("mob-nav-btn"))
+      el.classList.add("text-slate-500"); // Reset mobile specific
+  });
 
   // Afficher la vue cible
   const targetView = document.getElementById(`view-${tabName}`);
   if (targetView) targetView.classList.remove("hidden-view");
 
+  // Activer bouton Desktop
   const targetBtn = document.getElementById(`btn-${tabName}`);
   if (targetBtn) targetBtn.classList.add("active");
 
-  // Charger les données spécifiques
+  // Activer bouton Mobile (recherche par attribut data-tab)
+  const mobileBtn = document.querySelector(
+    `.mob-nav-btn[data-tab="${tabName}"]`
+  );
+  if (mobileBtn) {
+    mobileBtn.classList.remove("text-slate-500");
+    mobileBtn.classList.add("text-[#5475FF]"); // Couleur active mobile
+  }
+
+  // Charger les données spécifiques (reste inchangé)
   if (tabName === "bookings") renderAllBookingsView();
-  if (tabName === "services") renderAdminStats(); // Rafraichit aussi la liste services
+  if (tabName === "services") renderAdminStats();
   if (tabName === "reviews") renderReviewsView();
   if (tabName === "dashboard") renderAdminStats();
   if (tabName === "calendar") {
     setTimeout(() => {
       initAdminCalendar();
-      if (calendar) calendar.updateSize();
+      if (calendar) {
+        calendar.updateSize();
+        // Optionnel: Passer en vue journée sur mobile
+        if (window.innerWidth < 768) calendar.changeView("timeGridDay");
+        else calendar.changeView("timeGridWeek");
+      }
     }, 50);
   }
 }
