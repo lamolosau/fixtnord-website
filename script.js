@@ -393,37 +393,44 @@ window.handlePayment = async function (e) {
 let calendar = null;
 
 // --- MODIFICATION : checkAuth Robuste ---
+// Remplacez votre fonction checkAuth existante par celle-ci :
 async function checkAuth() {
-  // On récupère la session
+  // Sécurité : Si Supabase n'a pas chargé, on redirige par précaution
+  if (!supabase) {
+    console.error("Supabase non chargé");
+    window.location.href = "login.html";
+    return;
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // DÉTECTION : Sommes-nous sur la page Admin ?
-  // On cherche un élément unique au dashboard (la sidebar ou le conteneur principal)
+  // DÉTECTION : Page Admin ?
   const isAdminPage =
     document.getElementById("view-dashboard") ||
     document.querySelector(".glass-sidebar");
 
+  // DÉTECTION : Page Login ?
+  const isLoginPage = document.getElementById("login-form");
+
   if (isAdminPage) {
     if (!session) {
-      console.warn("⛔ Accès refusé, redirection vers login...");
+      // ⛔ Pas connecté : On redirige SANS afficher la page (le body reste en display:none)
       window.location.href = "login.html";
     } else {
+      // ✅ Connecté : On autorise l'affichage de la page maintenant
+      document.body.style.display = "flex";
       console.log("✅ Admin connecté :", session.user.email);
     }
-  }
-
-  // DÉTECTION : Sommes-nous sur la page Login ?
-  const isLoginPage = document.getElementById("login-form");
-  if (isLoginPage) {
+  } else if (isLoginPage) {
     if (session) {
-      console.log("🔄 Déjà connecté, redirection vers admin...");
+      // 🔄 Déjà connecté : On renvoie vers l'admin
       window.location.href = "admin.html";
     }
+    // Sur le login, le CSS ne cache pas le body, donc rien à faire de plus
   }
 }
-
 // --- MODIFICATION : Logout Robuste ---
 window.logout = async function () {
   showConfirm("Se déconnecter ?", async () => {
