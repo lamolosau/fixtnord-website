@@ -340,7 +340,6 @@ window.selectTime = function (timeStr, element) {
   btn.classList.remove("opacity-50", "cursor-not-allowed");
 };
 
-// --- MODIFICATION : Suppression de l'envoi d'email ---
 window.handlePayment = async function (e) {
   e.preventDefault();
   const btn = document.getElementById("pay-btn");
@@ -359,7 +358,6 @@ window.handlePayment = async function (e) {
   const start = new Date(y, m - 1, d, hours, minutes);
   const end = new Date(start.getTime() + currentService.duration * 60000);
 
-  // On stocke l'email en base mais on n'envoie RIEN
   const bookingData = {
     customer_name: (
       document.getElementById("prenom").value +
@@ -392,55 +390,53 @@ window.handlePayment = async function (e) {
 // =============================================================================
 let calendar = null;
 
-// --- MODIFICATION : checkAuth Robuste ---
-// Remplacez votre fonction checkAuth existante par celle-ci :
+// --- NOUVELLE FONCTION DE SÉCURITÉ ---
 async function checkAuth() {
-  // 1. Vérification de base : Si le SDK Supabase a planté, on renvoie au login
+  console.log("🔒 Vérification Auth démarre...");
+
   if (!supabase) {
-    console.error("Supabase non chargé");
+    console.error("❌ Supabase non chargé !");
     window.location.href = "login.html";
     return;
   }
 
-  // 2. On récupère la session utilisateur
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    console.error("❌ Erreur session:", error);
+    window.location.href = "login.html";
+    return;
+  }
 
-  // 3. DÉTECTION : Sur quelle page sommes-nous ?
+  const session = data.session;
+  console.log("ℹ️ Session état:", session ? "Connecté" : "Pas de session");
+
   const isAdminPage =
-    document.getElementById("view-dashboard") ||
+    document.querySelector("#view-dashboard") ||
     document.querySelector(".glass-sidebar");
   const isLoginPage = document.getElementById("login-form");
 
-  // CAS A : PAGE ADMIN
   if (isAdminPage) {
     if (!session) {
-      // ⛔ Pas connecté : On redirige IMMÉDIATEMENT.
-      // Grâce au CSS !important, la page reste noire/invisible pendant ce temps.
+      console.log("⛔ Accès refusé -> Redirection Login");
       window.location.href = "login.html";
     } else {
-      // ✅ Connecté : On force l'affichage en écrasant le CSS !important
-      document.body.style.setProperty("display", "flex", "important");
-      console.log("✅ Admin connecté :", session.user.email);
+      console.log("✅ Accès autorisé -> Affichage Dashboard");
+      // ON FORCE L'AFFICHAGE EN ÉCRASANT LE CSS !IMPORTANT
+      document.body.setAttribute("style", "display: flex !important");
+      // Initialisation du calendrier une fois connecté
+      setTimeout(() => initAdminCalendar(), 100);
     }
-  }
-  // CAS B : PAGE LOGIN
-  else if (isLoginPage) {
+  } else if (isLoginPage) {
     if (session) {
-      // 🔄 Déjà connecté : Inutile de rester sur le login, on va au dashboard
+      console.log("🔄 Déjà connecté -> Redirection Admin");
       window.location.href = "admin.html";
     }
-    // Si pas connecté, on laisse le login s'afficher (il n'a pas de display: none)
   }
 }
-// --- MODIFICATION : Logout Robuste ---
+
 window.logout = async function () {
   showConfirm("Se déconnecter ?", async () => {
-    // Tentative de déconnexion propre
     await supabase.auth.signOut();
-
-    // Nettoyage et redirection forcée
     localStorage.clear();
     window.location.href = "login.html";
   });
@@ -533,7 +529,6 @@ window.renderAllBookingsView = async function () {
     .join("");
 };
 
-// --- MODIFICATION : Suppression envoi email ---
 window.quickAction = async function (id, action) {
   if (action === "delete") {
     showConfirm("Supprimer/Annuler ce RDV ?", async () => {
@@ -745,7 +740,6 @@ function openBookingModal(event) {
   openModal("modal-booking");
 }
 
-// --- MODIFICATION : Suppression envoi email ---
 window.handleChangeStatus = async function (newStatus) {
   const id = document.getElementById("booking-id").value;
   if (!id) return;
@@ -789,81 +783,6 @@ window.handleDeleteBookingFromModal = function () {
   });
 };
 
-// =============================================================================
-// 6. INITIALISATION
-// =============================================================================
-document.addEventListener("DOMContentLoaded", async () => {
-  // Vérification de sécurité au chargement
-  await checkAuth();
-
-  const btnConf = document.getElementById("btn-confirm-action");
-  if (btnConf)
-    btnConf.addEventListener("click", () => {
-      if (pendingAction) pendingAction();
-      closeModal("modal-confirm");
-      pendingAction = null;
-    });
-
-  if (document.getElementById("page-title")) {
-    renderAdminStats();
-
-    const srv = await fetchServices();
-    const c = document.getElementById("admin-services-list");
-    if (c)
-      c.innerHTML = srv
-        .map(
-          (s) => `
-            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                <div class="font-bold text-white">${s.name} (${s.price}€)</div>
-                <button onclick="dbDeleteService(${s.id})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-            </div>`
-        )
-        .join("");
-    document.getElementById("count-services").innerText = srv.length;
-
-    const slotForm = document.getElementById("form-edit-slot");
-    if (slotForm) slotForm.addEventListener("submit", handleSaveSlot);
-  }
-
-  if (document.getElementById("booking-page")) {
-    renderServiceSelector();
-    const dp = document.getElementById("date-picker");
-    if (dp) dp.min = new Date().toISOString().split("T")[0];
-  }
-
-  const loginForm = document.getElementById("login-form");
-  if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const emailValue = document.getElementById("email").value;
-      const passwordValue = document.getElementById("password").value;
-      const btn = loginForm.querySelector("button");
-      const errorMsg = document.getElementById("login-error");
-
-      const originalText = btn.innerHTML;
-      btn.innerHTML =
-        '<i class="fa-solid fa-spinner fa-spin"></i> Connexion...';
-      btn.disabled = true;
-      errorMsg.classList.add("hidden");
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: emailValue,
-        password: passwordValue,
-      });
-
-      if (error) {
-        console.error("Login error:", error.message);
-        errorMsg.classList.remove("hidden");
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      } else {
-        window.location.href = "admin.html";
-      }
-    });
-  }
-});
-
 window.switchTab = function (tab) {
   document
     .querySelectorAll('[id^="view-"]')
@@ -905,131 +824,6 @@ window.dbDeleteService = dbDeleteService;
 
 // =============================================================================
 // 7. SYSTEME D'AVIS (REVIEWS)
-// =============================================================================
-
-// --- GESTION DU FORMULAIRE (avis.html) ---
-document.addEventListener("DOMContentLoaded", () => {
-  // Gestion des étoiles
-  const stars = document.querySelectorAll("#star-container i");
-  const ratingInput = document.getElementById("rating-value");
-
-  if (stars.length > 0) {
-    stars.forEach((star) => {
-      star.addEventListener("click", () => {
-        const val = star.getAttribute("data-value");
-        ratingInput.value = val;
-        updateStars(val);
-      });
-    });
-  }
-
-  function updateStars(value) {
-    stars.forEach((s) => {
-      const sVal = s.getAttribute("data-value");
-      if (sVal <= value) {
-        s.classList.remove("fa-regular");
-        s.classList.add("fa-solid", "text-orange-400");
-      } else {
-        s.classList.remove("fa-solid", "text-orange-400");
-        s.classList.add("fa-regular");
-      }
-    });
-  }
-
-  // Soumission du formulaire
-  const reviewForm = document.getElementById("review-form");
-  if (reviewForm) {
-    reviewForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const rating = document.getElementById("rating-value").value;
-      if (!rating)
-        return showNotification("Veuillez sélectionner une note.", "error");
-
-      const btn = document.getElementById("btn-submit-review");
-      const originalText = btn.innerText;
-      btn.innerText = "Envoi...";
-      btn.disabled = true;
-
-      const { error } = await supabase.from("reviews").insert([
-        {
-          customer_name: document.getElementById("review-name").value,
-          car_model: document.getElementById("review-car").value,
-          comment: document.getElementById("review-comment").value,
-          rating: parseInt(rating),
-          approved: false, // Sécurité : à valider en base de données
-        },
-      ]);
-
-      if (!error) {
-        reviewForm.classList.add("hidden");
-        document.getElementById("review-success").classList.remove("hidden");
-      } else {
-        showNotification("Erreur lors de l'envoi.", "error");
-        btn.innerText = originalText;
-        btn.disabled = false;
-      }
-    });
-  }
-
-  // Chargement du Carrousel (index.html)
-  if (document.getElementById("scrolling-wrapper-dynamic")) {
-    loadReviewsCarousel();
-  }
-});
-
-// --- LOGIQUE DU CARROUSEL DYNAMIQUE ---
-async function loadReviewsCarousel() {
-  const wrapper = document.getElementById("scrolling-wrapper-dynamic");
-
-  // 1. Récupérer les avis validés
-  // Note: Assure-toi d'avoir mis 'approved' à TRUE dans ta base pour tester
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select("*")
-    .eq("approved", true)
-    .order("created_at", { ascending: false })
-    .limit(10);
-
-  if (!reviews || reviews.length < 3) {
-    // S'il n'y a pas assez d'avis, on garde le HTML statique par défaut ou on met un message
-    console.log("Pas assez d'avis pour le carrousel dynamique.");
-    return;
-  }
-
-  // 2. Générer le HTML d'une carte
-  const generateCard = (r) => {
-    return `
-        <div class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">
-                    ${r.customer_name.charAt(0)}
-                </div>
-                <div>
-                    <div class="font-bold text-[#002050]">${
-                      r.customer_name
-                    }</div>
-                    <div class="text-xs text-slate-400">${r.car_model}</div>
-                </div>
-                <div class="ml-auto text-orange-400 text-xs">
-                    <i class="fa-solid fa-star"></i> ${r.rating}/5
-                </div>
-            </div>
-            <p class="text-slate-500 text-sm leading-relaxed line-clamp-4">"${
-              r.comment
-            }"</p>
-        </div>`;
-  };
-
-  // 3. Construire la boucle (Contenu Original + Clone pour l'infini)
-  const reviewsHTML = reviews.map((r) => generateCard(r)).join("");
-
-  // On injecte : Original + Original (le clone)
-  wrapper.innerHTML = reviewsHTML + reviewsHTML;
-}
-
-// =============================================================================
-// GESTION DES AVIS (ADMIN)
 // =============================================================================
 
 window.renderReviewsView = async function () {
@@ -1135,3 +929,196 @@ window.deleteReview = function (id) {
     }
   });
 };
+
+async function loadReviewsCarousel() {
+  const wrapper = document.getElementById("scrolling-wrapper-dynamic");
+
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("approved", true)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (!reviews || reviews.length < 3) {
+    console.log("Pas assez d'avis pour le carrousel dynamique.");
+    return;
+  }
+
+  const generateCard = (r) => {
+    return `
+        <div class="w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">
+                    ${r.customer_name.charAt(0)}
+                </div>
+                <div>
+                    <div class="font-bold text-[#002050]">${
+                      r.customer_name
+                    }</div>
+                    <div class="text-xs text-slate-400">${r.car_model}</div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                    <i class="fa-solid fa-star"></i> ${r.rating}/5
+                </div>
+            </div>
+            <p class="text-slate-500 text-sm leading-relaxed line-clamp-4">"${
+              r.comment
+            }"</p>
+        </div>`;
+  };
+
+  const reviewsHTML = reviews.map((r) => generateCard(r)).join("");
+  wrapper.innerHTML = reviewsHTML + reviewsHTML;
+}
+
+// =============================================================================
+// 8. INITIALISATION (DOMContentLoaded UNIQUE)
+// =============================================================================
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("🚀 DOM Chargé");
+
+  // 1. Lancer la sécurité (Auth)
+  await checkAuth();
+
+  // Gestion Modal Confirmation
+  const btnConf = document.getElementById("btn-confirm-action");
+  if (btnConf)
+    btnConf.addEventListener("click", () => {
+      if (pendingAction) pendingAction();
+      closeModal("modal-confirm");
+      pendingAction = null;
+    });
+
+  // 2. Initialiser le Dashboard Admin (si on y est)
+  if (document.getElementById("page-title")) {
+    console.log("📊 Chargement des stats Admin...");
+    renderAdminStats();
+
+    // Charger les services
+    const srv = await fetchServices();
+    const c = document.getElementById("admin-services-list");
+    if (c)
+      c.innerHTML = srv
+        .map(
+          (s) => `
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                <div class="font-bold text-white">${s.name} (${s.price}€)</div>
+                <button onclick="dbDeleteService(${s.id})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+            </div>`
+        )
+        .join("");
+    if (document.getElementById("count-services"))
+      document.getElementById("count-services").innerText = srv.length;
+
+    // Listeners
+    const slotForm = document.getElementById("form-edit-slot");
+    if (slotForm) slotForm.addEventListener("submit", handleSaveSlot);
+  }
+
+  // 3. Initialiser le Booking (Côté Client)
+  if (document.getElementById("booking-page")) {
+    renderServiceSelector();
+    const dp = document.getElementById("date-picker");
+    if (dp) dp.min = new Date().toISOString().split("T")[0];
+  }
+
+  // 4. Initialiser la page Login
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const emailValue = document.getElementById("email").value;
+      const passwordValue = document.getElementById("password").value;
+      const btn = loginForm.querySelector("button");
+      const errorMsg = document.getElementById("login-error");
+
+      const originalText = btn.innerHTML;
+      btn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Connexion...';
+      btn.disabled = true;
+      errorMsg.classList.add("hidden");
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: emailValue,
+        password: passwordValue,
+      });
+
+      if (error) {
+        console.error("Login error:", error.message);
+        errorMsg.classList.remove("hidden");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      } else {
+        window.location.href = "admin.html";
+      }
+    });
+  }
+
+  // 5. Initialiser les Avis (Review Form)
+  const stars = document.querySelectorAll("#star-container i");
+  const ratingInput = document.getElementById("rating-value");
+
+  if (stars.length > 0) {
+    stars.forEach((star) => {
+      star.addEventListener("click", () => {
+        const val = star.getAttribute("data-value");
+        ratingInput.value = val;
+        updateStars(val);
+      });
+    });
+  }
+
+  function updateStars(value) {
+    stars.forEach((s) => {
+      const sVal = s.getAttribute("data-value");
+      if (sVal <= value) {
+        s.classList.remove("fa-regular");
+        s.classList.add("fa-solid", "text-orange-400");
+      } else {
+        s.classList.remove("fa-solid", "text-orange-400");
+        s.classList.add("fa-regular");
+      }
+    });
+  }
+
+  const reviewForm = document.getElementById("review-form");
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const rating = document.getElementById("rating-value").value;
+      if (!rating)
+        return showNotification("Veuillez sélectionner une note.", "error");
+
+      const btn = document.getElementById("btn-submit-review");
+      const originalText = btn.innerText;
+      btn.innerText = "Envoi...";
+      btn.disabled = true;
+
+      const { error } = await supabase.from("reviews").insert([
+        {
+          customer_name: document.getElementById("review-name").value,
+          car_model: document.getElementById("review-car").value,
+          comment: document.getElementById("review-comment").value,
+          rating: parseInt(rating),
+          approved: false,
+        },
+      ]);
+
+      if (!error) {
+        reviewForm.classList.add("hidden");
+        document.getElementById("review-success").classList.remove("hidden");
+      } else {
+        showNotification("Erreur lors de l'envoi.", "error");
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    });
+  }
+
+  // 6. Charger le carrousel sur l'index
+  if (document.getElementById("scrolling-wrapper-dynamic")) {
+    loadReviewsCarousel();
+  }
+});
