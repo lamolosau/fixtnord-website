@@ -2,30 +2,36 @@
 import { supabase } from "./config.js";
 
 export async function checkAuth() {
-  // On récupère la session
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
 
   const path = window.location.pathname;
-  // Détection souple des pages
-  const isAdminPage = path.includes("admin.html") || path.endsWith("/admin");
-  const isLoginPage = path.includes("login.html") || path.endsWith("/login");
 
-  // 1. Protection Admin : Pas de session -> Hop, Login
+  // CORRECTION ICI : On cherche juste "admin" ou "login" (plus souple)
+  const isAdminPage = path.includes("admin");
+  const isLoginPage = path.includes("login");
+
+  // 1. Redirection de sécurité
   if (isAdminPage && !session) {
-    window.location.replace("login.html"); // .replace évite le retour arrière
+    // Si on est sur admin sans session -> Login
+    // replace() est mieux que href car on ne peut pas faire "Retour"
+    window.location.replace("login.html");
     return;
-  }
-
-  // 2. Protection Login : Déjà connecté -> Hop, Admin
-  else if (isLoginPage && session) {
+  } else if (isLoginPage && session) {
+    // Si on est sur login avec session -> Admin
     window.location.replace("admin.html");
     return;
   }
 
-  // Si on est admin et connecté, on affiche le contenu
-  if (isAdminPage && session) {
-    document.body.style.setProperty("display", "flex", "important");
+  // 2. Affichage du contenu (La correction anti-page blanche)
+  if (isAdminPage) {
+    if (session) {
+      document.body.style.visibility = "visible";
+      document.body.style.opacity = "1";
+    } else {
+      // Si pas de session (et que la redirection traîne), on laisse caché
+      // ou on affiche rien. Le replace() plus haut s'en charge.
+    }
   }
 }
 
@@ -37,16 +43,12 @@ export async function login(email, password) {
 
 export async function logout() {
   try {
-    // 1. Demande à Supabase de fermer la session
     await supabase.auth.signOut();
-  } catch (error) {
-    console.error("Erreur lors de la déconnexion:", error);
+  } catch (err) {
+    console.error(err);
   } finally {
-    // 2. LA SOLUTION : On vide brutalement le stockage local du navigateur
-    // Cela garantit qu'il ne reste aucune trace de "session fantôme"
+    // Nettoyage brutal pour éviter les boucles de redirection
     localStorage.clear();
-
-    // 3. Redirection propre
     window.location.replace("login.html");
   }
 }
