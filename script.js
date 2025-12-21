@@ -1,17 +1,24 @@
 // =============================================================================
 // 1. CONFIGURATION & INITIALISATION SUPABASE
 // =============================================================================
-const SUPABASE_URL = "https://kpndqsranyqwcjzggfyu.supabase.co";
-const SUPABASE_KEY =
+// Variable renommée pour éviter tout conflit avec window.supabase
+const PROJECT_URL = "https://kpndqsranyqwcjzggfyu.supabase.co";
+const PROJECT_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwbmRxc3Jhbnlxd2NqemdnZnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTA5MTEsImV4cCI6MjA3NjUyNjkxMX0.XJ5cj5nrv7VyQsStFe-N6rByU34bmkFMneWj3Jv42yI";
 
-let supabase;
+let sbClient = null; // Renommé de 'supabase' à 'sbClient' pour éviter les conflits
+
 if (window.supabase) {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  sbClient = window.supabase.createClient(PROJECT_URL, PROJECT_KEY);
   console.log("✅ Supabase connecté.");
 } else {
-  console.error("❌ ERREUR: Supabase SDK manquant.");
+  console.error(
+    "❌ ERREUR: Supabase SDK manquant. Vérifiez votre connexion internet."
+  );
 }
+
+// Nous utilisons sbClient partout maintenant
+const supabase = sbClient;
 
 const SHOP_CONFIG = { stepMinutes: 30 };
 
@@ -85,18 +92,18 @@ window.closeModal = function (id) {
 // =============================================================================
 
 async function dbCreateSlot(startIso, endIso) {
-  const { data, error } = await supabase
+  const { data, error } = await sbClient
     .from("slots")
     .insert([{ start_time: startIso, end_time: endIso }])
     .select();
   return { data, error };
 }
 async function dbDeleteSlot(id) {
-  const { error } = await supabase.from("slots").delete().eq("id", id);
+  const { error } = await sbClient.from("slots").delete().eq("id", id);
   return error;
 }
 async function dbUpdateSlotTime(id, newStartIso, newEndIso) {
-  const { error } = await supabase
+  const { error } = await sbClient
     .from("slots")
     .update({ start_time: newStartIso, end_time: newEndIso })
     .eq("id", id);
@@ -104,37 +111,37 @@ async function dbUpdateSlotTime(id, newStartIso, newEndIso) {
 }
 
 async function dbAddBooking(bookingData) {
-  return await supabase
+  return await sbClient
     .from("bookings")
     .insert([{ ...bookingData, status: "pending" }])
     .select();
 }
 async function dbDeleteBooking(id) {
-  return await supabase.from("bookings").delete().eq("id", id);
+  return await sbClient.from("bookings").delete().eq("id", id);
 }
 async function dbUpdateBookingStatus(id, status) {
-  return await supabase
+  return await sbClient
     .from("bookings")
     .update({ status: status })
     .eq("id", id);
 }
 async function dbFetchBookings() {
-  return await supabase
+  return await sbClient
     .from("bookings")
     .select("*")
     .order("start_time", { ascending: false });
 }
 
 async function fetchServices() {
-  const { data } = await supabase.from("services").select("*").order("price");
+  const { data } = await sbClient.from("services").select("*").order("price");
   return data || [];
 }
 async function dbAddService(name, price, duration) {
-  return await supabase.from("services").insert([{ name, price, duration }]);
+  return await sbClient.from("services").insert([{ name, price, duration }]);
 }
 async function dbDeleteService(id) {
   showConfirm("Supprimer ce service ?", async () => {
-    const { error } = await supabase.from("services").delete().eq("id", id);
+    const { error } = await sbClient.from("services").delete().eq("id", id);
     if (!error) {
       window.location.reload();
     } else {
@@ -221,12 +228,12 @@ window.onDateChanged = async function () {
   const endDay = new Date(dateInput);
   endDay.setHours(23, 59, 59, 999);
 
-  const { data: rawSlots } = await supabase
+  const { data: rawSlots } = await sbClient
     .from("slots")
     .select("*")
     .gte("end_time", startDay.toISOString())
     .lte("start_time", endDay.toISOString());
-  const { data: busyBookings } = await supabase
+  const { data: busyBookings } = await sbClient
     .from("bookings")
     .select("*")
     .gte("end_time", startDay.toISOString())
@@ -390,17 +397,17 @@ window.handlePayment = async function (e) {
 // =============================================================================
 let calendar = null;
 
-// --- NOUVELLE FONCTION DE SÉCURITÉ ---
+// --- FONCTION DE SÉCURITÉ ROBUSTE ---
 async function checkAuth() {
   console.log("🔒 Vérification Auth démarre...");
 
-  if (!supabase) {
+  if (!sbClient) {
     console.error("❌ Supabase non chargé !");
     window.location.href = "login.html";
     return;
   }
 
-  const { data, error } = await supabase.auth.getSession();
+  const { data, error } = await sbClient.auth.getSession();
   if (error) {
     console.error("❌ Erreur session:", error);
     window.location.href = "login.html";
@@ -421,9 +428,8 @@ async function checkAuth() {
       window.location.href = "login.html";
     } else {
       console.log("✅ Accès autorisé -> Affichage Dashboard");
-      // ON FORCE L'AFFICHAGE EN ÉCRASANT LE CSS !IMPORTANT
       document.body.setAttribute("style", "display: flex !important");
-      // Initialisation du calendrier une fois connecté
+      // On lance le calendrier seulement ici
       setTimeout(() => initAdminCalendar(), 100);
     }
   } else if (isLoginPage) {
@@ -436,14 +442,14 @@ async function checkAuth() {
 
 window.logout = async function () {
   showConfirm("Se déconnecter ?", async () => {
-    await supabase.auth.signOut();
+    await sbClient.auth.signOut();
     localStorage.clear();
     window.location.href = "login.html";
   });
 };
 
 async function renderAdminStats() {
-  const { data: bookings } = await supabase.from("bookings").select("*");
+  const { data: bookings } = await sbClient.from("bookings").select("*");
   if (!bookings) return;
 
   document.getElementById("stat-revenue").innerText =
@@ -588,12 +594,12 @@ async function initAdminCalendar() {
 
     events: async function (info, successCallback, failureCallback) {
       try {
-        const { data: slots } = await supabase
+        const { data: slots } = await sbClient
           .from("slots")
           .select("*")
           .gte("end_time", info.startStr)
           .lte("start_time", info.endStr);
-        const { data: bookings } = await supabase
+        const { data: bookings } = await sbClient
           .from("bookings")
           .select("*")
           .gte("end_time", info.startStr)
@@ -833,7 +839,7 @@ window.renderReviewsView = async function () {
   tbody.innerHTML =
     '<tr><td colspan="6" class="text-center p-4 text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</td></tr>';
 
-  const { data: reviews, error } = await supabase
+  const { data: reviews, error } = await sbClient
     .from("reviews")
     .select("*")
     .order("created_at", { ascending: false });
@@ -900,7 +906,7 @@ window.toggleReviewStatus = async function (id, newStatus) {
   const originalContent = btn.innerHTML;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-  const { error } = await supabase
+  const { error } = await sbClient
     .from("reviews")
     .update({ approved: newStatus })
     .eq("id", id);
@@ -919,7 +925,7 @@ window.toggleReviewStatus = async function (id, newStatus) {
 
 window.deleteReview = function (id) {
   showConfirm("Supprimer définitivement cet avis ?", async () => {
-    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    const { error } = await sbClient.from("reviews").delete().eq("id", id);
 
     if (!error) {
       showNotification("Avis supprimé.", "success");
@@ -932,8 +938,9 @@ window.deleteReview = function (id) {
 
 async function loadReviewsCarousel() {
   const wrapper = document.getElementById("scrolling-wrapper-dynamic");
+  if (!wrapper) return;
 
-  const { data: reviews } = await supabase
+  const { data: reviews } = await sbClient
     .from("reviews")
     .select("*")
     .eq("approved", true)
@@ -1040,7 +1047,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.disabled = true;
       errorMsg.classList.add("hidden");
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await sbClient.auth.signInWithPassword({
         email: emailValue,
         password: passwordValue,
       });
@@ -1096,7 +1103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.innerText = "Envoi...";
       btn.disabled = true;
 
-      const { error } = await supabase.from("reviews").insert([
+      const { error } = await sbClient.from("reviews").insert([
         {
           customer_name: document.getElementById("review-name").value,
           car_model: document.getElementById("review-car").value,
