@@ -41,6 +41,11 @@ window.showNotification = function (message, type = "success") {
       border: "border-red-400",
       icon: '<i class="fa-solid fa-triangle-exclamation"></i>',
     },
+    info: {
+      bg: "bg-blue-500/90",
+      border: "border-blue-400",
+      icon: '<i class="fa-solid fa-circle-info"></i>',
+    },
   };
   const style = styles[type] || styles.success;
   const toast = document.createElement("div");
@@ -251,13 +256,14 @@ window.handleSaveSlot = async function (e) {
 };
 
 window.handleDeleteSlot = function () {
-  // ICI : ON FERME LA PREMIÈRE MODALE AVANT D'OUVRIR LA CONFIRMATION
+  // CORRECTION ICI : On ferme d'abord la modale d'édition pour éviter le conflit
   closeModal("modal-slot");
+  // Ensuite on demande confirmation
   showConfirm("Supprimer ce créneau ?", async () => {
     const id = document.getElementById("slot-id").value;
     const { error } = await appClient.from("slots").delete().eq("id", id);
     if (!error) {
-      calendar.refetchEvents();
+      if (calendar) calendar.refetchEvents();
       showNotification("Créneau supprimé", "success");
     }
   });
@@ -448,11 +454,11 @@ async function renderServiceSelector() {
   container.innerHTML =
     '<div class="text-center py-4 text-blue-300"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</div>';
 
-  // VERIFICATION: Si la liste est vide, c'est sûrement qu'il n'y a plus de services en base
+  // Si la liste est vide, on l'affiche clairement
   const services = await fetchServices();
   if (services.length === 0) {
     container.innerHTML =
-      "<p class='text-center text-red-400 bg-red-50 p-2 rounded'>Aucun service disponible.<br><span class='text-xs text-slate-500'>Veuillez en ajouter via le panel Admin.</span></p>";
+      "<p class='text-center text-red-400 bg-red-50 p-2 rounded'>Aucun service disponible.<br><span class='text-xs text-slate-500'>Ajoutez-en via le panel Admin.</span></p>";
     return;
   }
 
@@ -469,35 +475,28 @@ async function renderServiceSelector() {
     .join("");
 }
 
-// Remplace toute la fonction window.onDateChanged par celle-ci :
+// --- CORRECTION CRITIQUE DU DÉCOUPAGE DES CRÉNEAUX ---
 window.onDateChanged = async function () {
   const dateInput = document.getElementById("date-picker").value;
   if (!dateInput || !currentService) return;
-
   const container = document.getElementById("slots-container");
   const loader = document.getElementById("slots-loader");
-
-  // Affichage du chargement
   if (loader) loader.classList.remove("hidden");
   container.innerHTML = "";
   document
     .getElementById("slots-step")
     .classList.remove("opacity-50", "pointer-events-none");
 
-  // Définition du jour (00:00 à 23:59)
   const startDay = new Date(dateInput);
   startDay.setHours(0, 0, 0, 0);
   const endDay = new Date(dateInput);
   endDay.setHours(23, 59, 59, 999);
 
-  // 1. Récupérer tes disponibilités (Slots créés dans l'admin)
   const { data: rawSlots } = await appClient
     .from("slots")
     .select("*")
     .gte("end_time", startDay.toISOString())
     .lte("start_time", endDay.toISOString());
-
-  // 2. Récupérer les RDV déjà pris (pour éviter les chevauchements)
   const { data: busyBookings } = await appClient
     .from("bookings")
     .select("*")
@@ -505,79 +504,64 @@ window.onDateChanged = async function () {
     .lte("start_time", endDay.toISOString());
 
   if (loader) loader.classList.add("hidden");
-
   if (!rawSlots || rawSlots.length === 0) {
     container.innerHTML =
       '<div class="col-span-3 text-center text-slate-400 py-2">Aucune disponibilité ce jour.</div>';
     return;
   }
 
-  // --- C'EST ICI QUE LA MAGIE OPÈRE (DÉCOUPAGE) ---
+  // --- LOGIQUE DÉCOUPAGE ---
   let availableTimes = [];
+  const step = 30; // 30 minutes
+  const duration = parseInt(currentService.duration) || 60; // Sécurité
 
-  // On trie les slots par heure de début
   rawSlots.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-  // Pour chaque grand créneau dispo (ex: 8h-20h)
-  for (let slot of rawSlots) {
+  // Pour chaque grand créneau ouvert par l'admin (ex: 8h-20h)
+  rawSlots.forEach((slot) => {
     let cursor = new Date(slot.start_time);
     let limit = new Date(slot.end_time);
 
-    // Tant que (Curseur + Durée Prestation) <= Fin du Créneau
-    while (
-      cursor.getTime() + currentService.duration * 60000 <=
-      limit.getTime()
-    ) {
-      const attemptStart = new Date(cursor);
-      const attemptEnd = new Date(
-        cursor.getTime() + currentService.duration * 60000
-      );
+    // On avance par tranche de 30min
+    while (cursor.getTime() + duration * 60000 <= limit.getTime()) {
+      const startAttempt = new Date(cursor);
+      const endAttempt = new Date(cursor.getTime() + duration * 60000);
 
-      // Vérification : Est-ce que ce créneau tombe sur un RDV existant ?
-      const isClash = busyBookings.some((b) => {
+      // On vérifie si ÇA TOUCHE un RDV existant
+      const isBusy = busyBookings.some((b) => {
         const bStart = new Date(b.start_time);
         const bEnd = new Date(b.end_time);
-        // Chevauchement si : (DébutTentative < FinRDV) ET (FinTentative > DébutRDV)
-        return attemptStart < bEnd && attemptEnd > bStart;
+        // Chevauchement : Début < FinRDV ET Fin > DébutRDV
+        return startAttempt < bEnd && endAttempt > bStart;
       });
 
-      // Si pas de clash, on l'ajoute
-      if (!isClash) {
-        // On formate l'heure pour l'affichage (HH:MM)
-        const timeStr = attemptStart.toLocaleTimeString("fr-FR", {
+      if (!isBusy) {
+        const label = cursor.toLocaleTimeString("fr-FR", {
           hour: "2-digit",
           minute: "2-digit",
         });
-        // On stocke l'objet complet pour éviter les doublons d'affichage
-        if (!availableTimes.some((t) => t.label === timeStr)) {
-          availableTimes.push({
-            label: timeStr,
-            iso: attemptStart.toISOString(),
-          });
+        if (!availableTimes.some((t) => t.label === label)) {
+          availableTimes.push({ label, iso: startAttempt.toISOString() });
         }
       }
-
-      // On avance le curseur de 30 minutes (STEP)
-      cursor.setMinutes(cursor.getMinutes() + SHOP_CONFIG.stepMinutes);
+      cursor.setMinutes(cursor.getMinutes() + step);
     }
-  }
+  });
 
-  // --- AFFICHAGE ---
   if (availableTimes.length === 0) {
     container.innerHTML =
       '<div class="col-span-3 text-center text-orange-400 py-2">Complet.</div>';
   } else {
-    // On trie les résultats chronologiquement
+    // Tri final et affichage
     availableTimes.sort((a, b) => a.label.localeCompare(b.label));
-
-    let html = "";
-    availableTimes.forEach((t) => {
-      html += `<div class="time-slot" onclick="selectTime('${t.label}', '${t.iso}', this)">${t.label}</div>`;
-    });
-    container.innerHTML = html;
+    container.innerHTML = availableTimes
+      .map(
+        (t) =>
+          `<div class="time-slot" onclick="selectTime('${t.label}', '${t.iso}', this)">${t.label}</div>`
+      )
+      .join("");
   }
 
-  // Mise à jour date résumé
   const [y, m, d] = dateInput.split("-");
   document.getElementById("summary-date").innerText = new Date(
     y,
