@@ -18,8 +18,9 @@
 
     <style>
       /* --- PREVENTS FLASH OF UNSTYLED CONTENT (FOUC) --- */
+      /* Dans admin.html, remplacez le style body par ceci : */
       body {
-        display: none; /* Caché par défaut, affiché par JS une fois chargé */
+        display: none !important; /* <--- L'ajout de !important est CRUCIAL */
         background-color: #020617;
         color: #e2e8f0;
         overflow: hidden;

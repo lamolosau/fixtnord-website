@@ -395,40 +395,43 @@ let calendar = null;
 // --- MODIFICATION : checkAuth Robuste ---
 // Remplacez votre fonction checkAuth existante par celle-ci :
 async function checkAuth() {
-  // Sécurité : Si Supabase n'a pas chargé, on redirige par précaution
+  // 1. Vérification de base : Si le SDK Supabase a planté, on renvoie au login
   if (!supabase) {
     console.error("Supabase non chargé");
     window.location.href = "login.html";
     return;
   }
 
+  // 2. On récupère la session utilisateur
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // DÉTECTION : Page Admin ?
+  // 3. DÉTECTION : Sur quelle page sommes-nous ?
   const isAdminPage =
     document.getElementById("view-dashboard") ||
     document.querySelector(".glass-sidebar");
-
-  // DÉTECTION : Page Login ?
   const isLoginPage = document.getElementById("login-form");
 
+  // CAS A : PAGE ADMIN
   if (isAdminPage) {
     if (!session) {
-      // ⛔ Pas connecté : On redirige SANS afficher la page (le body reste en display:none)
+      // ⛔ Pas connecté : On redirige IMMÉDIATEMENT.
+      // Grâce au CSS !important, la page reste noire/invisible pendant ce temps.
       window.location.href = "login.html";
     } else {
-      // ✅ Connecté : On autorise l'affichage de la page maintenant
-      document.body.style.display = "flex";
+      // ✅ Connecté : On force l'affichage en écrasant le CSS !important
+      document.body.style.setProperty("display", "flex", "important");
       console.log("✅ Admin connecté :", session.user.email);
     }
-  } else if (isLoginPage) {
+  }
+  // CAS B : PAGE LOGIN
+  else if (isLoginPage) {
     if (session) {
-      // 🔄 Déjà connecté : On renvoie vers l'admin
+      // 🔄 Déjà connecté : Inutile de rester sur le login, on va au dashboard
       window.location.href = "admin.html";
     }
-    // Sur le login, le CSS ne cache pas le body, donc rien à faire de plus
+    // Si pas connecté, on laisse le login s'afficher (il n'a pas de display: none)
   }
 }
 // --- MODIFICATION : Logout Robuste ---
