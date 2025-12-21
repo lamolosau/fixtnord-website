@@ -231,6 +231,12 @@
     ></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+    <script type="module" src="js/app-client.js"></script>
+    <script type="module">
+      import { handlePayment } from "./js/app-client.js"; // Assure-toi d'exporter handlePayment dans app-client
+      document
+        .getElementById("booking-form")
+        .addEventListener("submit", handlePayment);
+    </script>
   </body>
 </html>

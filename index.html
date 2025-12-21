@@ -215,8 +215,11 @@
               ></i>
               Android Auto
             </div>
-            <div class="flex items-center gap-2 ml-auto text-orange-400">
-              <i class="fa-solid fa-star"></i> 4.9/5
+            <div
+              id="global-rating"
+              class="flex items-center gap-2 ml-auto text-orange-400 font-bold transition-all duration-500"
+            >
+              <i class="fa-solid fa-star"></i> --/5
             </div>
           </div>
         </div>
@@ -596,15 +599,15 @@
           </h2>
 
           <div
-            class="flex justify-center items-center gap-2 text-orange-400 text-sm font-bold"
+            id="section-rating-display"
+            class="flex flex-col justify-center items-center gap-2 mb-4 min-h-[60px]"
           >
-            <div class="flex">
-              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
-              ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
-              ><i class="fa-solid fa-star"></i>
+            <div class="text-orange-400 text-sm font-bold animate-pulse">
+              <i class="fa-solid fa-spinner fa-spin"></i> Chargement de la
+              note...
             </div>
-            <span class="text-slate-400">(4.9/5 sur Google)</span>
           </div>
+
           <a
             href="avis.html"
             class="text-sm text-[#5475FF] font-bold hover:underline"
@@ -735,7 +738,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+    <script type="module" src="js/app-client.js"></script>
     <script>
       // Contenu des textes légaux
       const legalTexts = {
