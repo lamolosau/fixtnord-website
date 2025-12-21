@@ -79,9 +79,10 @@ window.showConfirm = function (message, callback) {
 };
 
 // =============================================================================
-// 3. NAVIGATION
+// 3. NAVIGATION & PERSISTANCE
 // =============================================================================
 window.switchTab = function (tabName) {
+  localStorage.setItem("activeAdminTab", tabName);
   document
     .querySelectorAll('[id^="view-"]')
     .forEach((el) => el.classList.add("hidden-view"));
@@ -98,7 +99,12 @@ window.switchTab = function (tabName) {
   if (tabName === "bookings") renderAllBookingsView();
   if (tabName === "services") renderAdminStats();
   if (tabName === "reviews") renderReviewsView();
-  if (tabName === "calendar") setTimeout(initAdminCalendar, 100);
+  if (tabName === "calendar") {
+    setTimeout(() => {
+      initAdminCalendar();
+      if (calendar) calendar.updateSize();
+    }, 50);
+  }
 };
 
 // =============================================================================
@@ -119,7 +125,8 @@ async function checkAuth() {
     } else {
       document.body.style.setProperty("display", "flex", "important");
       renderAdminStats();
-      renderAllBookingsView();
+      const lastTab = localStorage.getItem("activeAdminTab") || "dashboard";
+      switchTab(lastTab);
       const slotForm = document.getElementById("form-edit-slot");
       if (slotForm) slotForm.addEventListener("submit", handleSaveSlot);
     }
@@ -131,12 +138,182 @@ async function checkAuth() {
 window.logout = function () {
   showConfirm("Se déconnecter ?", async () => {
     await appClient.auth.signOut();
+    localStorage.removeItem("activeAdminTab");
     window.location.href = "login.html";
   });
 };
 
 // =============================================================================
-// 5. CALENDRIER (FULLCALENDAR)
+// 5. INTELLIGENCE & STATISTIQUES
+// =============================================================================
+let revenueChart = null;
+
+async function renderAdminStats() {
+  if (!document.getElementById("stat-revenue")) return;
+
+  const { data: bookings } = await appClient.from("bookings").select("*");
+  const { data: reviews } = await appClient.from("reviews").select("*");
+  const { data: services } = await appClient.from("services").select("*");
+
+  if (!bookings) return;
+
+  const totalRevenue = bookings.reduce(
+    (sum, b) => sum + (parseFloat(b.price) || 0),
+    0
+  );
+  const finishedCount = bookings.filter((b) => b.status === "finished").length;
+  const pendingCount = bookings.filter((b) => b.status === "pending").length;
+  const avgBasket =
+    bookings.length > 0 ? Math.round(totalRevenue / bookings.length) : 0;
+
+  let avgRating = 0;
+  if (reviews && reviews.length > 0) {
+    const totalStars = reviews.reduce((sum, r) => sum + r.rating, 0);
+    avgRating = (totalStars / reviews.length).toFixed(1);
+  }
+
+  document.getElementById("stat-revenue").innerText = totalRevenue + "€";
+  document.getElementById(
+    "stat-avg-cart"
+  ).innerText = `Panier moyen: ${avgBasket}€`;
+  document.getElementById("stat-finished").innerText = finishedCount;
+  document.getElementById("stat-pending").innerText = pendingCount;
+  document.getElementById("stat-rating").innerText = avgRating;
+  if (document.getElementById("stat-review-count"))
+    document.getElementById("stat-review-count").innerText = `${
+      reviews ? reviews.length : 0
+    } avis reçus`;
+
+  const months = [
+    "Jan",
+    "Fév",
+    "Mar",
+    "Avr",
+    "Mai",
+    "Juin",
+    "Juil",
+    "Août",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Déc",
+  ];
+  let monthlyData = new Array(12).fill(0);
+  bookings.forEach((b) => {
+    const d = new Date(b.start_time);
+    monthlyData[d.getMonth()] += parseFloat(b.price) || 0;
+  });
+
+  const ctx = document.getElementById("revenueChart");
+  if (ctx) {
+    if (revenueChart) revenueChart.destroy();
+    revenueChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: months,
+        datasets: [
+          {
+            label: "Revenus (€)",
+            data: monthlyData,
+            borderColor: "#5475FF",
+            backgroundColor: "rgba(84, 117, 255, 0.1)",
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: "#fff",
+            pointBorderColor: "#5475FF",
+            pointRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: "rgba(255, 255, 255, 0.05)" },
+            ticks: { color: "#94a3b8" },
+          },
+          x: { grid: { display: false }, ticks: { color: "#94a3b8" } },
+        },
+      },
+    });
+  }
+
+  let serviceCounts = {};
+  bookings.forEach((b) => {
+    serviceCounts[b.service_name] = (serviceCounts[b.service_name] || 0) + 1;
+  });
+  const sortedServices = Object.entries(serviceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+
+  const topServicesEl = document.getElementById("top-services-list");
+  if (topServicesEl) {
+    topServicesEl.innerHTML = sortedServices.length
+      ? sortedServices
+          .map(
+            ([name, count], index) => `
+            <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 text-[#5475FF] flex items-center justify-center font-bold text-sm">#${
+                      index + 1
+                    }</div>
+                    <div class="text-white font-bold text-sm">${name}</div>
+                </div>
+                <div class="text-xs text-slate-400 font-bold">${count} ventes</div>
+            </div>
+        `
+          )
+          .join("")
+      : '<div class="text-slate-500 italic">Pas assez de données.</div>';
+  }
+
+  const latestTable = document.getElementById("latest-bookings-body");
+  if (latestTable) {
+    const latest = [...bookings]
+      .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+      .slice(0, 5);
+    latestTable.innerHTML = latest
+      .map(
+        (b) => `
+            <tr class="border-b border-white/5 last:border-0 hover:bg-white/5 transition">
+                <td class="p-3 text-slate-400 text-sm">${new Date(
+                  b.start_time
+                ).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "short",
+                })}</td>
+                <td class="p-3 font-bold text-white">${b.customer_name}</td>
+                <td class="p-3 text-sm text-slate-300">${b.service_name}</td>
+                <td class="p-3"><span class="status-badge status-${b.status}">${
+          b.status
+        }</span></td>
+                <td class="p-3 font-bold text-[#5475FF]">${b.price}€</td>
+            </tr>
+        `
+      )
+      .join("");
+  }
+
+  const srvList = document.getElementById("admin-services-list");
+  if (srvList && services) {
+    srvList.innerHTML = services
+      .map(
+        (s) => `
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                <div><div class="font-bold text-white">${s.name}</div><div class="text-xs text-slate-400">${s.duration} min</div></div>
+                <div class="flex gap-3 items-center"><span class="text-[#5475FF] font-bold">${s.price}€</span><button onclick="dbDeleteService(${s.id})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>
+            </div>`
+      )
+      .join("");
+  }
+}
+
+// =============================================================================
+// 6. CALENDRIER & EVENTS
 // =============================================================================
 let calendar = null;
 async function initAdminCalendar() {
@@ -144,6 +321,7 @@ async function initAdminCalendar() {
   if (!calendarEl) return;
   if (calendar) {
     calendar.render();
+    calendar.updateSize();
     return;
   }
 
@@ -222,6 +400,7 @@ async function initAdminCalendar() {
                 price: b.price,
                 service: b.service_name,
                 status: st,
+                address: b.address, // Adresse
               },
             });
           });
@@ -230,7 +409,6 @@ async function initAdminCalendar() {
         failureCallback(e);
       }
     },
-
     eventClick: function (info) {
       const props = info.event.extendedProps;
       if (props.type === "slot") openSlotModal(info.event);
@@ -269,6 +447,9 @@ function openBookingModal(event) {
       minute: "2-digit",
     });
 
+  const addrEl = document.getElementById("booking-address");
+  if (addrEl) addrEl.innerText = props.address || "Adresse non renseignée";
+
   const statusMap = {
     pending: "En attente ⏳",
     confirmed: "Confirmé ✅",
@@ -296,7 +477,6 @@ function openBookingModal(event) {
   } else if (st === "confirmed") {
     if (btnFinish) btnFinish.classList.remove("hidden");
   }
-
   openModal("modal-booking");
 }
 
@@ -357,40 +537,13 @@ window.handleDeleteBookingFromModal = function () {
   });
 };
 
-// =============================================================================
-// 6. DONNÉES & CRUD
-// =============================================================================
+// --- CRUD & VUES ---
 async function fetchServices() {
   const { data } = await appClient.from("services").select("*").order("price");
   return data || [];
 }
 
-async function renderAdminStats() {
-  if (document.getElementById("stat-revenue")) {
-    const { data: bookings } = await appClient.from("bookings").select("*");
-    if (bookings) {
-      const total = bookings.reduce((sum, b) => sum + (b.price || 0), 0);
-      document.getElementById("stat-revenue").innerText = total + "€";
-      document.getElementById("count-rdv").innerText = bookings.length;
-    }
-  }
-  const srvList = document.getElementById("admin-services-list");
-  if (srvList) {
-    const services = await fetchServices();
-    if (document.getElementById("count-services"))
-      document.getElementById("count-services").innerText = services.length;
-    srvList.innerHTML = services
-      .map(
-        (s) => `
-            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                <div><div class="font-bold text-white">${s.name}</div><div class="text-xs text-slate-400">${s.duration} min</div></div>
-                <div class="flex gap-3 items-center"><span class="text-[#5475FF] font-bold">${s.price}€</span><button onclick="dbDeleteService(${s.id})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>
-            </div>`
-      )
-      .join("");
-  }
-}
-
+// CORRECTION ALIGNEMENT BOUTONS ACTIONS
 async function renderReviewsView() {
   const tbody = document.getElementById("reviews-table-body");
   if (!tbody) return;
@@ -422,21 +575,20 @@ async function renderReviewsView() {
                 ? '<span class="status-badge status-confirmed">Publié</span>'
                 : '<span class="status-badge status-pending">Masqué</span>'
             }</td>
-            <td class="p-3 text-right">
+            <td class="p-3 text-center">
                 <button onclick="toggleReviewStatus('${
                   r.id
-                }', ${!r.approved})" class="mr-2 text-blue-400"><i class="fa-solid ${
+                }', ${!r.approved})" class="mr-2 text-blue-400 hover:text-white transition"><i class="fa-solid ${
         r.approved ? "fa-eye-slash" : "fa-check"
       }"></i></button>
                 <button onclick="deleteReview('${
                   r.id
-                }')" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                }')" class="text-red-400 hover:text-white transition"><i class="fa-solid fa-trash"></i></button>
             </td>
         </tr>`
     )
     .join("");
 }
-
 window.toggleReviewStatus = async function (id, newStatus) {
   await appClient.from("reviews").update({ approved: newStatus }).eq("id", id);
   renderReviewsView();
@@ -454,6 +606,8 @@ async function dbFetchBookings() {
     .select("*")
     .order("start_time", { ascending: false });
 }
+
+// CORRECTION ALIGNEMENT BOUTONS ACTIONS
 async function renderAllBookingsView() {
   const tbody = document.getElementById("all-bookings-table-body");
   if (!tbody) return;
@@ -480,14 +634,15 @@ async function renderAllBookingsView() {
             <td class="p-3"><span class="status-badge status-${b.status}">${
         b.status
       }</span></td>
-            <td class="p-3 text-center"><button onclick="quickAction('${
-              b.id
-            }', 'delete')" class="text-red-400 hover:text-white px-2"><i class="fa-solid fa-trash"></i></button></td>
+            <td class="p-3 text-center">
+                <button onclick="quickAction('${
+                  b.id
+                }', 'delete')" class="text-red-400 hover:text-white px-2"><i class="fa-solid fa-trash"></i></button>
+            </td>
         </tr>`
     )
     .join("");
 }
-
 window.quickAction = function (id, action) {
   if (action === "delete")
     showConfirm("Supprimer ?", async () => {
@@ -516,9 +671,7 @@ window.dbDeleteService = function (id) {
   });
 };
 
-// =============================================================================
-// 7. CLIENT SIDE (BOOKING & REVIEWS DISPLAY)
-// =============================================================================
+// --- CLIENT SIDE ---
 let currentService = null;
 window.selectService = function (id, name, price, duration, element) {
   document
@@ -541,70 +694,68 @@ async function renderServiceSelector() {
   if (!container) return;
   container.innerHTML =
     '<div class="text-center py-4 text-blue-300"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</div>';
-
   const services = await fetchServices();
   if (services.length === 0) {
     container.innerHTML =
-      "<p class='text-center text-red-400 bg-red-50 p-2 rounded'>Aucun service disponible.<br><span class='text-xs text-slate-500'>Ajoutez-en via le panel Admin.</span></p>";
+      "<p class='text-center text-red-400 bg-red-50 p-2 rounded'>Aucun service.</p>";
     return;
   }
-
   container.innerHTML = services
-    .map((s) => {
-      const safeName = s.name.replace(/'/g, "\\'");
-      return `
-        <div onclick="selectService(${s.id}, '${safeName}', ${s.price}, ${s.duration}, this)" 
-             class="service-card border border-white/20 bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition mb-2 flex justify-between items-center group">
-             <div><div class="font-bold text-white text-lg">${s.name}</div><div class="text-xs text-blue-300 font-medium">${s.duration} min</div></div>
-             <div class="font-bold text-[#5475FF] bg-blue-50 px-3 py-1 rounded-lg shadow-sm">${s.price}€</div>
-        </div>`;
-    })
+    .map(
+      (s) => `
+        <div onclick="selectService(${s.id}, '${s.name.replace(
+        /'/g,
+        "\\'"
+      )}', ${s.price}, ${
+        s.duration
+      }, this)" class="service-card border border-white/20 bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition mb-2 flex justify-between items-center group">
+             <div><div class="font-bold text-white text-lg">${
+               s.name
+             }</div><div class="text-xs text-blue-300 font-medium">${
+        s.duration
+      } min</div></div>
+             <div class="font-bold text-[#5475FF] bg-blue-50 px-3 py-1 rounded-lg shadow-sm">${
+               s.price
+             }€</div>
+        </div>`
+    )
     .join("");
 }
 
-// AFFICHAGE DES AVIS SUR LE SITE
 async function loadReviewsCarousel() {
   const wrapper = document.getElementById("scrolling-wrapper-dynamic");
   if (!wrapper) return;
-
   const { data: reviews } = await appClient
     .from("reviews")
     .select("*")
-    .eq("approved", true) // SEULS LES AVIS APPROUVÉS
+    .eq("approved", true)
     .order("created_at", { ascending: false })
     .limit(10);
-
   if (!reviews || reviews.length === 0) return;
-
   const cards = reviews
     .map(
       (r) => `
         <div class="w-[300px] md:w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0 mx-2 snap-center">
             <div class="flex items-center gap-4 mb-4">
-                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">
-                    ${r.customer_name.charAt(0)}
-                </div>
-                <div>
-                    <div class="font-bold text-[#002050]">${
-                      r.customer_name
-                    }</div>
-                    <div class="text-xs text-slate-400">${
-                      r.car_model || "Client"
-                    }</div>
-                </div>
-                <div class="ml-auto text-orange-400 text-xs">
-                    <i class="fa-solid fa-star"></i> ${r.rating}/5
-                </div>
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">${r.customer_name.charAt(
+                  0
+                )}</div>
+                <div><div class="font-bold text-[#002050]">${
+                  r.customer_name
+                }</div><div class="text-xs text-slate-400">${
+        r.car_model || "Client"
+      }</div></div>
+                <div class="ml-auto text-orange-400 text-xs"><i class="fa-solid fa-star"></i> ${
+                  r.rating
+                }/5</div>
             </div>
             <p class="text-slate-500 text-sm leading-relaxed line-clamp-4">"${
               r.comment
             }"</p>
-        </div>
-    `
+        </div>`
     )
     .join("");
-
-  wrapper.innerHTML = cards; // Pas de duplication pour le moment, simple affichage
+  wrapper.innerHTML = cards;
 }
 
 window.onDateChanged = async function () {
@@ -622,7 +773,6 @@ window.onDateChanged = async function () {
   startDay.setHours(0, 0, 0, 0);
   const endDay = new Date(dateInput);
   endDay.setHours(23, 59, 59, 999);
-
   const { data: rawSlots } = await appClient
     .from("slots")
     .select("*")
@@ -642,32 +792,28 @@ window.onDateChanged = async function () {
   }
 
   let availableTimes = [];
-  const step = 30; // 30 minutes
-  const duration = parseInt(currentService.duration) || 60; // Sécurité
-
+  const step = 30;
+  const duration = parseInt(currentService.duration) || 60;
   rawSlots.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
   rawSlots.forEach((slot) => {
     let cursor = new Date(slot.start_time);
     let limit = new Date(slot.end_time);
-
     while (cursor.getTime() + duration * 60000 <= limit.getTime()) {
       const startAttempt = new Date(cursor);
       const endAttempt = new Date(cursor.getTime() + duration * 60000);
       const isBusy = busyBookings.some((b) => {
-        const bStart = new Date(b.start_time);
-        const bEnd = new Date(b.end_time);
-        return startAttempt < bEnd && endAttempt > bStart;
+        const bS = new Date(b.start_time);
+        const bE = new Date(b.end_time);
+        return startAttempt < bE && endAttempt > bS;
       });
-
       if (!isBusy) {
         const label = cursor.toLocaleTimeString("fr-FR", {
           hour: "2-digit",
           minute: "2-digit",
         });
-        if (!availableTimes.some((t) => t.label === label)) {
+        if (!availableTimes.some((t) => t.label === label))
           availableTimes.push({ label, iso: startAttempt.toISOString() });
-        }
       }
       cursor.setMinutes(cursor.getMinutes() + step);
     }
@@ -685,7 +831,6 @@ window.onDateChanged = async function () {
       )
       .join("");
   }
-
   const [y, m, d] = dateInput.split("-");
   document.getElementById("summary-date").innerText = new Date(
     y,
@@ -720,6 +865,15 @@ window.handlePayment = async function (e) {
   if (!window.selectedSlotIso) return;
   const start = new Date(window.selectedSlotIso);
   const end = new Date(start.getTime() + currentService.duration * 60000);
+
+  // Récupération des 3 champs véhicules
+  const make = document.getElementById("car-make").value;
+  const model = document.getElementById("car-model").value;
+  const year = document.getElementById("car-year").value;
+  const fullCarModel = `${make} ${model} (${year})`;
+
+  const addressVal = document.getElementById("address").value;
+
   const { error } = await appClient.from("bookings").insert([
     {
       customer_name: (
@@ -728,8 +882,9 @@ window.handlePayment = async function (e) {
         document.getElementById("nom").value
       ).trim(),
       email: document.getElementById("email").value,
-      car_model: document.getElementById("modele").value,
       phone: document.getElementById("tel").value,
+      car_model: fullCarModel,
+      address: addressVal,
       service_name: currentService.name,
       price: currentService.price,
       start_time: start.toISOString(),
@@ -737,8 +892,9 @@ window.handlePayment = async function (e) {
       status: "pending",
     },
   ]);
+
   if (!error) {
-    showNotification("RDV Confirmé !", "success");
+    showNotification("Rendez-vous envoyé !", "success");
     setTimeout(() => (window.location.href = "index.html"), 2000);
   } else {
     alert("Erreur: " + error.message);
@@ -756,13 +912,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       pendingAction = null;
     });
 
-  // 1. Charger Auth
   await checkAuth();
-
-  // 2. Charger les avis publics
   loadReviewsCarousel();
 
-  // 3. Logique Login
   if (document.getElementById("login-form"))
     document
       .getElementById("login-form")
@@ -777,14 +929,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         else window.location.href = "admin.html";
       });
 
-  // 4. Logique Booking
   if (document.getElementById("booking-page")) {
     renderServiceSelector();
     const dp = document.getElementById("date-picker");
     if (dp) dp.min = new Date().toISOString().split("T")[0];
   }
 
-  // 5. Logique Envoi Avis (Formulaire)
   const reviewForm = document.getElementById("review-form");
   if (reviewForm) {
     const stars = document.querySelectorAll("#star-container i");
@@ -808,22 +958,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
       const rating = ratingInput.value;
       if (!rating) return alert("Notez la prestation svp !");
-
       const btn = document.getElementById("btn-submit-review");
       const originalText = btn.innerHTML;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi...';
       btn.disabled = true;
-
       const { error } = await appClient.from("reviews").insert([
         {
           customer_name: document.getElementById("review-name").value,
           car_model: document.getElementById("review-car").value,
           comment: document.getElementById("review-comment").value,
           rating: parseInt(rating),
-          approved: false, // Doit être validé par admin
+          approved: false,
         },
       ]);
-
       if (!error) {
         reviewForm.reset();
         stars.forEach((s) => {

@@ -132,51 +132,91 @@
             <input type="hidden" id="final-time" />
             <input type="hidden" id="final-price" />
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-3">
+              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
+                >Vos coordonnées</label
+              >
+              <div class="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  id="prenom"
+                  placeholder="Prénom"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+                <input
+                  type="text"
+                  id="nom"
+                  placeholder="Nom"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Email"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+                <input
+                  type="tel"
+                  id="tel"
+                  placeholder="Téléphone"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
+                >Lieu d'intervention</label
+              >
               <input
                 type="text"
-                id="prenom"
-                placeholder="Prénom"
+                id="address"
+                placeholder="Adresse complète (Rue, Ville, Code Postal)"
                 required
-                class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
-              />
-              <input
-                type="text"
-                id="nom"
-                placeholder="Nom"
-                required
-                class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
               />
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="email"
-                id="email"
-                placeholder="Email"
-                required
-                class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
-              />
-              <input
-                type="tel"
-                id="tel"
-                placeholder="Téléphone"
-                required
-                class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
-              />
+
+            <div class="space-y-3">
+              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
+                >Votre Véhicule</label
+              >
+              <div class="grid grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  id="car-make"
+                  placeholder="Marque (ex: Audi)"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+                <input
+                  type="text"
+                  id="car-model"
+                  placeholder="Modèle (ex: A3)"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+                <input
+                  type="number"
+                  id="car-year"
+                  placeholder="Année"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+              </div>
             </div>
-            <input
-              type="text"
-              id="modele"
-              placeholder="Modèle du véhicule"
-              required
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
-            />
 
             <button
               type="submit"
               id="pay-btn"
               disabled
-              class="w-full bg-[#5475FF] hover:bg-[#3b5bdb] text-white py-5 rounded-2xl font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              class="w-full bg-[#5475FF] hover:bg-[#3b5bdb] text-white py-5 rounded-2xl font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-4"
             >
               Confirmer le rendez-vous
             </button>

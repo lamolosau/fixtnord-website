@@ -11,6 +11,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css" />
 
     <style>
@@ -30,6 +31,8 @@
         color: #fff !important;
         border: 1px solid rgba(84, 117, 255, 0.3);
       }
+
+      /* TABLEAUX */
       .glass-table th {
         color: #64748b;
         font-size: 0.75rem;
@@ -37,13 +40,14 @@
         letter-spacing: 0.1em;
         padding: 1.2rem 1rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        text-align: left;
       }
       .glass-table td {
         padding: 1.2rem 1rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.03);
         vertical-align: middle;
       }
+
+      /* BADGES */
       .status-badge {
         padding: 6px 14px;
         border-radius: 9999px;
@@ -51,8 +55,6 @@
         font-weight: 800;
         text-transform: uppercase;
       }
-
-      /* COULEURS STATUTS */
       .status-pending {
         background: rgba(245, 158, 11, 0.15);
         color: #fbbf24;
@@ -63,6 +65,7 @@
         color: #60a5fa;
         border: 1px solid rgba(59, 130, 246, 0.3);
       }
+      /* Correction couleur terminé (Vert) */
       .status-finished {
         background: rgba(16, 185, 129, 0.15);
         color: #34d399;
@@ -85,6 +88,8 @@
       .modal-backdrop.active {
         display: flex !important;
       }
+
+      /* FullCalendar */
       .fc-theme-standard th {
         border: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -190,34 +195,124 @@
           id="view-dashboard"
           class="absolute inset-0 px-8 pb-8 overflow-y-auto"
         >
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="p-6 rounded-3xl bg-white/5 border border-white/5">
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          >
+            <div
+              class="p-6 rounded-3xl bg-white/5 border border-white/5 relative overflow-hidden"
+            >
+              <div
+                class="absolute right-[-20px] top-[-20px] w-24 h-24 bg-blue-500/10 rounded-full blur-xl"
+              ></div>
               <div class="text-slate-400 text-xs font-bold uppercase mb-2">
                 Chiffre d'Affaires
               </div>
-              <div class="text-4xl font-extrabold text-white" id="stat-revenue">
+              <div class="text-3xl font-extrabold text-white" id="stat-revenue">
                 0€
               </div>
-            </div>
-            <div class="p-6 rounded-3xl bg-white/5 border border-white/5">
-              <div class="text-slate-400 text-xs font-bold uppercase mb-2">
-                Réservations
-              </div>
-              <div class="text-4xl font-extrabold text-white" id="count-rdv">
-                0
+              <div
+                class="text-xs text-blue-400 mt-2 font-medium"
+                id="stat-avg-cart"
+              >
+                Panier moyen: 0€
               </div>
             </div>
-            <div class="p-6 rounded-3xl bg-white/5 border border-white/5">
+            <div
+              class="p-6 rounded-3xl bg-white/5 border border-white/5 relative overflow-hidden"
+            >
+              <div
+                class="absolute right-[-20px] top-[-20px] w-24 h-24 bg-emerald-500/10 rounded-full blur-xl"
+              ></div>
               <div class="text-slate-400 text-xs font-bold uppercase mb-2">
-                Services
+                RDV Terminés
               </div>
               <div
-                class="text-4xl font-extrabold text-white"
-                id="count-services"
+                class="text-3xl font-extrabold text-white"
+                id="stat-finished"
               >
                 0
               </div>
             </div>
+            <div
+              class="p-6 rounded-3xl bg-white/5 border border-white/5 relative overflow-hidden"
+            >
+              <div
+                class="absolute right-[-20px] top-[-20px] w-24 h-24 bg-orange-500/10 rounded-full blur-xl"
+              ></div>
+              <div class="text-slate-400 text-xs font-bold uppercase mb-2">
+                À Traiter
+              </div>
+              <div class="text-3xl font-extrabold text-white" id="stat-pending">
+                0
+              </div>
+            </div>
+            <div
+              class="p-6 rounded-3xl bg-white/5 border border-white/5 relative overflow-hidden"
+            >
+              <div
+                class="absolute right-[-20px] top-[-20px] w-24 h-24 bg-yellow-500/10 rounded-full blur-xl"
+              ></div>
+              <div class="text-slate-400 text-xs font-bold uppercase mb-2">
+                Satisfaction
+              </div>
+              <div class="text-3xl font-extrabold text-white">
+                <span id="stat-rating">0</span>
+                <i class="fa-solid fa-star text-yellow-400 text-xl"></i>
+              </div>
+              <div
+                class="text-xs text-slate-400 mt-2 font-medium"
+                id="stat-review-count"
+              >
+                0 avis
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div
+              class="lg:col-span-2 bg-white/5 border border-white/5 p-6 rounded-3xl"
+            >
+              <h3 class="font-bold text-white mb-6">Évolution des Revenus</h3>
+              <div class="h-64 w-full"><canvas id="revenueChart"></canvas></div>
+            </div>
+            <div
+              class="lg:col-span-1 bg-white/5 border border-white/5 p-6 rounded-3xl"
+            >
+              <h3 class="font-bold text-white mb-6">Top Prestations</h3>
+              <div id="top-services-list" class="space-y-4">
+                <div class="text-slate-500 text-sm text-center italic">
+                  Calcul...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white/5 border border-white/5 rounded-3xl overflow-hidden"
+          >
+            <div
+              class="p-6 border-b border-white/5 flex justify-between items-center"
+            >
+              <h3 class="font-bold text-white">Dernières demandes</h3>
+              <button
+                onclick="switchTab('bookings')"
+                class="text-xs text-[#5475FF]"
+              >
+                Tout voir
+              </button>
+            </div>
+            <table class="w-full glass-table text-left border-collapse">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Service</th>
+                  <th>Statut</th>
+                  <th>Prix</th>
+                </tr>
+              </thead>
+              <tbody id="latest-bookings-body"></tbody>
+            </table>
           </div>
         </div>
 
@@ -240,11 +335,11 @@
             <table class="w-full glass-table text-left border-collapse">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Client</th>
-                  <th>Service</th>
-                  <th>Statut</th>
-                  <th class="text-center w-24">Actions</th>
+                  <th class="text-left">Date</th>
+                  <th class="text-left">Client</th>
+                  <th class="text-left">Service</th>
+                  <th class="text-left">Statut</th>
+                  <th class="text-center w-32">Actions</th>
                 </tr>
               </thead>
               <tbody id="all-bookings-table-body"></tbody>
@@ -275,7 +370,7 @@
                   <input
                     type="text"
                     name="name"
-                    placeholder="Nom du service"
+                    placeholder="Nom"
                     required
                     class="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white"
                   />
@@ -328,12 +423,12 @@
             <table class="w-full glass-table text-left border-collapse">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Client</th>
-                  <th>Note</th>
-                  <th class="w-1/3">Commentaire</th>
-                  <th>Statut</th>
-                  <th class="text-center w-24">Actions</th>
+                  <th class="text-left">Date</th>
+                  <th class="text-left">Client</th>
+                  <th class="text-left">Note</th>
+                  <th class="text-left w-1/3">Commentaire</th>
+                  <th class="text-left">Statut</th>
+                  <th class="text-center w-32">Actions</th>
                 </tr>
               </thead>
               <tbody id="reviews-table-body"></tbody>
@@ -455,6 +550,17 @@
               <div id="booking-phone"></div>
             </div>
           </div>
+
+          <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+            <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+              Lieu d'intervention
+            </div>
+            <div class="text-white font-medium text-sm flex items-start gap-2">
+              <i class="fa-solid fa-location-dot text-[#5475FF] mt-1"></i>
+              <span id="booking-address">...</span>
+            </div>
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
             <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
               <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
@@ -474,6 +580,7 @@
               </div>
             </div>
           </div>
+
           <div
             class="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between"
           >
