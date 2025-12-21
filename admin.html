@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="style.css" />
 
     <style>
-      /* --- SÉCURITÉ : PAGE MASQUÉE PAR DÉFAUT --- */
       body {
         display: none !important;
         background-color: #020617;
@@ -66,7 +65,6 @@
         display: none;
       }
 
-      /* Modales */
       .modal-backdrop {
         position: fixed;
         inset: 0;
@@ -81,7 +79,6 @@
         display: flex !important;
       }
 
-      /* FullCalendar Custom */
       .fc-theme-standard th {
         border: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -413,6 +410,109 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <div id="modal-booking" class="modal-backdrop z-[300]">
+      <div
+        class="glass-modal p-8 w-[500px] bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl"
+      >
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <h3 class="text-2xl font-bold text-white">Détails Rendez-vous</h3>
+            <p
+              class="text-xs font-bold uppercase tracking-wider mt-1"
+              id="modal-status-text"
+            >
+              ...
+            </p>
+          </div>
+          <button
+            onclick="closeModal('modal-booking')"
+            class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <input type="hidden" id="booking-id" />
+        <div class="space-y-4">
+          <div class="bg-white/5 p-5 rounded-2xl border border-white/5">
+            <div class="text-[10px] text-slate-400 uppercase font-bold mb-2">
+              Client
+            </div>
+            <div class="text-white font-bold text-xl" id="booking-client">
+              ...
+            </div>
+            <div class="flex flex-col gap-1 mt-2 text-sm text-slate-300">
+              <div id="booking-email"></div>
+              <div id="booking-phone"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Véhicule
+              </div>
+              <div class="text-white font-semibold" id="booking-car">...</div>
+            </div>
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Prix
+              </div>
+              <div
+                class="text-emerald-400 font-bold text-lg"
+                id="booking-price"
+              >
+                ...
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between"
+          >
+            <div>
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Service
+              </div>
+              <div class="text-white font-medium" id="booking-service">...</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
+                Horaire
+              </div>
+              <div
+                class="text-xs text-white bg-white/10 px-2 py-1 rounded"
+                id="booking-time"
+              >
+                ...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-6 mt-6 border-t border-white/10">
+          <button
+            onclick="handleDeleteBookingFromModal()"
+            class="col-span-2 px-4 py-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl font-bold text-sm transition border border-red-500/20"
+          >
+            Supprimer le RDV
+          </button>
+          <button
+            onclick="handleChangeStatus('confirmed')"
+            class="px-4 py-3 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-bold text-sm"
+          >
+            Confirmer
+          </button>
+          <button
+            onclick="handleChangeStatus('finished')"
+            class="px-4 py-3 bg-slate-700 text-white hover:bg-slate-600 rounded-xl font-bold text-sm"
+          >
+            Terminer
+          </button>
+        </div>
       </div>
     </div>
 

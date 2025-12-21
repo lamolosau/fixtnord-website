@@ -41,11 +41,6 @@ window.showNotification = function (message, type = "success") {
       border: "border-red-400",
       icon: '<i class="fa-solid fa-triangle-exclamation"></i>',
     },
-    info: {
-      bg: "bg-blue-500/90",
-      border: "border-blue-400",
-      icon: '<i class="fa-solid fa-circle-info"></i>',
-    },
   };
   const style = styles[type] || styles.success;
   const toast = document.createElement("div");
@@ -213,7 +208,16 @@ async function initAdminCalendar() {
               backgroundColor: c.bg,
               borderColor: c.border,
               textColor: c.text,
-              extendedProps: { type: "booking", dbId: b.id },
+              extendedProps: {
+                type: "booking",
+                dbId: b.id,
+                email: b.email,
+                phone: b.phone,
+                car: b.car_model,
+                price: b.price,
+                service: b.service_name,
+                status: st,
+              },
             });
           });
         successCallback(combined);
@@ -221,8 +225,12 @@ async function initAdminCalendar() {
         failureCallback(e);
       }
     },
+
+    // CORRECTION ICI : GESTION DU CLIC BOOKING
     eventClick: function (info) {
-      if (info.event.extendedProps.type === "slot") openSlotModal(info.event);
+      const props = info.event.extendedProps;
+      if (props.type === "slot") openSlotModal(info.event);
+      else if (props.type === "booking") openBookingModal(info.event);
     },
   });
   calendar.render();
@@ -237,6 +245,44 @@ function openSlotModal(event) {
   document.getElementById("slot-start").value = format(event.start);
   document.getElementById("slot-end").value = format(event.end);
   openModal("modal-slot");
+}
+
+// NOUVELLE FONCTION : Ouvrir la modale de détails RDV
+function openBookingModal(event) {
+  const props = event.extendedProps;
+  document.getElementById("booking-id").value = props.dbId;
+  document.getElementById("booking-client").innerText = event.title;
+  document.getElementById("booking-email").innerText =
+    props.email || "Non renseigné";
+  document.getElementById("booking-phone").innerText =
+    props.phone || "Non renseigné";
+  document.getElementById("booking-car").innerText = props.car || "N/A";
+  document.getElementById("booking-price").innerText =
+    (props.price || "0") + "€";
+  document.getElementById("booking-service").innerText = props.service || "...";
+  document.getElementById("booking-time").innerText =
+    event.start.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const statusMap = {
+    pending: "En attente ⏳",
+    confirmed: "Confirmé ✅",
+    finished: "Terminé 🏁",
+  };
+  const st = props.status || "pending";
+  const txt = document.getElementById("modal-status-text");
+  txt.innerText = statusMap[st];
+  txt.className = `text-xs font-bold uppercase tracking-wider ${
+    st === "pending"
+      ? "text-orange-400"
+      : st === "confirmed"
+      ? "text-blue-400"
+      : "text-slate-500"
+  }`;
+
+  openModal("modal-booking");
 }
 
 window.handleSaveSlot = async function (e) {
@@ -256,15 +302,43 @@ window.handleSaveSlot = async function (e) {
 };
 
 window.handleDeleteSlot = function () {
-  // CORRECTION ICI : On ferme d'abord la modale d'édition pour éviter le conflit
   closeModal("modal-slot");
-  // Ensuite on demande confirmation
   showConfirm("Supprimer ce créneau ?", async () => {
     const id = document.getElementById("slot-id").value;
     const { error } = await appClient.from("slots").delete().eq("id", id);
     if (!error) {
-      if (calendar) calendar.refetchEvents();
+      calendar.refetchEvents();
       showNotification("Créneau supprimé", "success");
+    }
+  });
+};
+
+// GESTION DES ACTIONS DEPUIS LA MODALE BOOKING
+window.handleChangeStatus = async function (newStatus) {
+  const id = document.getElementById("booking-id").value;
+  const { error } = await appClient
+    .from("bookings")
+    .update({ status: newStatus })
+    .eq("id", id);
+  if (!error) {
+    closeModal("modal-booking");
+    if (calendar) calendar.refetchEvents();
+    renderAllBookingsView();
+    renderAdminStats();
+    showNotification("Statut mis à jour");
+  }
+};
+
+window.handleDeleteBookingFromModal = function () {
+  closeModal("modal-booking");
+  showConfirm("Supprimer définitivement ce RDV ?", async () => {
+    const id = document.getElementById("booking-id").value;
+    const { error } = await appClient.from("bookings").delete().eq("id", id);
+    if (!error) {
+      if (calendar) calendar.refetchEvents();
+      renderAllBookingsView();
+      renderAdminStats();
+      showNotification("RDV supprimé");
     }
   });
 };
@@ -475,7 +549,7 @@ async function renderServiceSelector() {
     .join("");
 }
 
-// --- CORRECTION CRITIQUE DU DÉCOUPAGE DES CRÉNEAUX ---
+// --- LOGIQUE DÉCOUPAGE ---
 window.onDateChanged = async function () {
   const dateInput = document.getElementById("date-picker").value;
   if (!dateInput || !currentService) return;
@@ -510,7 +584,6 @@ window.onDateChanged = async function () {
     return;
   }
 
-  // --- LOGIQUE DÉCOUPAGE ---
   let availableTimes = [];
   const step = 30; // 30 minutes
   const duration = parseInt(currentService.duration) || 60; // Sécurité
