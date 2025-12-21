@@ -51,6 +51,8 @@
         font-weight: 800;
         text-transform: uppercase;
       }
+
+      /* COULEURS STATUTS */
       .status-pending {
         background: rgba(245, 158, 11, 0.15);
         color: #fbbf24;
@@ -61,10 +63,15 @@
         color: #60a5fa;
         border: 1px solid rgba(59, 130, 246, 0.3);
       }
+      .status-finished {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
       .hidden-view {
         display: none;
       }
-
       .modal-backdrop {
         position: fixed;
         inset: 0;
@@ -78,7 +85,6 @@
       .modal-backdrop.active {
         display: flex !important;
       }
-
       .fc-theme-standard th {
         border: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -238,7 +244,7 @@
                   <th>Client</th>
                   <th>Service</th>
                   <th>Statut</th>
-                  <th class="text-right">Actions</th>
+                  <th class="text-center w-24">Actions</th>
                 </tr>
               </thead>
               <tbody id="all-bookings-table-body"></tbody>
@@ -327,7 +333,7 @@
                   <th>Note</th>
                   <th class="w-1/3">Commentaire</th>
                   <th>Statut</th>
-                  <th class="text-right">Actions</th>
+                  <th class="text-center w-24">Actions</th>
                 </tr>
               </thead>
               <tbody id="reviews-table-body"></tbody>
@@ -449,7 +455,6 @@
               <div id="booking-phone"></div>
             </div>
           </div>
-
           <div class="grid grid-cols-2 gap-4">
             <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
               <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">
@@ -469,7 +474,6 @@
               </div>
             </div>
           </div>
-
           <div
             class="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between"
           >
@@ -498,19 +502,23 @@
             onclick="handleDeleteBookingFromModal()"
             class="col-span-2 px-4 py-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl font-bold text-sm transition border border-red-500/20"
           >
-            Supprimer le RDV
+            Supprimer / Annuler
           </button>
+
           <button
+            id="btn-modal-confirm"
             onclick="handleChangeStatus('confirmed')"
-            class="px-4 py-3 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-bold text-sm"
+            class="col-span-2 px-4 py-3 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 transition-all"
           >
-            Confirmer
+            Confirmer le RDV
           </button>
+
           <button
+            id="btn-modal-finish"
             onclick="handleChangeStatus('finished')"
-            class="px-4 py-3 bg-slate-700 text-white hover:bg-slate-600 rounded-xl font-bold text-sm"
+            class="col-span-2 px-4 py-3 bg-emerald-600 text-white hover:bg-emerald-500 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all"
           >
-            Terminer
+            Terminer la prestation
           </button>
         </div>
       </div>

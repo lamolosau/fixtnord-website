@@ -21,7 +21,7 @@ try {
 const STATUS_COLORS = {
   pending: { bg: "#f59e0b", border: "#d97706", text: "#fff" },
   confirmed: { bg: "#3b82f6", border: "#2563eb", text: "#fff" },
-  finished: { bg: "#64748b", border: "#475569", text: "#cbd5e1" },
+  finished: { bg: "#10b981", border: "#059669", text: "#fff" },
 };
 
 // =============================================================================
@@ -40,6 +40,11 @@ window.showNotification = function (message, type = "success") {
       bg: "bg-red-500/90",
       border: "border-red-400",
       icon: '<i class="fa-solid fa-triangle-exclamation"></i>',
+    },
+    info: {
+      bg: "bg-blue-500/90",
+      border: "border-blue-400",
+      icon: '<i class="fa-solid fa-circle-info"></i>',
     },
   };
   const style = styles[type] || styles.success;
@@ -226,7 +231,6 @@ async function initAdminCalendar() {
       }
     },
 
-    // CORRECTION ICI : GESTION DU CLIC BOOKING
     eventClick: function (info) {
       const props = info.event.extendedProps;
       if (props.type === "slot") openSlotModal(info.event);
@@ -247,7 +251,6 @@ function openSlotModal(event) {
   openModal("modal-slot");
 }
 
-// NOUVELLE FONCTION : Ouvrir la modale de détails RDV
 function openBookingModal(event) {
   const props = event.extendedProps;
   document.getElementById("booking-id").value = props.dbId;
@@ -279,8 +282,20 @@ function openBookingModal(event) {
       ? "text-orange-400"
       : st === "confirmed"
       ? "text-blue-400"
-      : "text-slate-500"
+      : "text-emerald-500"
   }`;
+
+  const btnConfirm = document.getElementById("btn-modal-confirm");
+  const btnFinish = document.getElementById("btn-modal-finish");
+
+  if (btnConfirm) btnConfirm.classList.add("hidden");
+  if (btnFinish) btnFinish.classList.add("hidden");
+
+  if (st === "pending") {
+    if (btnConfirm) btnConfirm.classList.remove("hidden");
+  } else if (st === "confirmed") {
+    if (btnFinish) btnFinish.classList.remove("hidden");
+  }
 
   openModal("modal-booking");
 }
@@ -313,7 +328,6 @@ window.handleDeleteSlot = function () {
   });
 };
 
-// GESTION DES ACTIONS DEPUIS LA MODALE BOOKING
 window.handleChangeStatus = async function (newStatus) {
   const id = document.getElementById("booking-id").value;
   const { error } = await appClient
@@ -466,7 +480,7 @@ async function renderAllBookingsView() {
             <td class="p-3"><span class="status-badge status-${b.status}">${
         b.status
       }</span></td>
-            <td class="p-3 text-right"><button onclick="quickAction('${
+            <td class="p-3 text-center"><button onclick="quickAction('${
               b.id
             }', 'delete')" class="text-red-400 hover:text-white px-2"><i class="fa-solid fa-trash"></i></button></td>
         </tr>`
@@ -503,7 +517,7 @@ window.dbDeleteService = function (id) {
 };
 
 // =============================================================================
-// 7. CLIENT SIDE (BOOKING)
+// 7. CLIENT SIDE (BOOKING & REVIEWS DISPLAY)
 // =============================================================================
 let currentService = null;
 window.selectService = function (id, name, price, duration, element) {
@@ -528,7 +542,6 @@ async function renderServiceSelector() {
   container.innerHTML =
     '<div class="text-center py-4 text-blue-300"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</div>';
 
-  // Si la liste est vide, on l'affiche clairement
   const services = await fetchServices();
   if (services.length === 0) {
     container.innerHTML =
@@ -549,7 +562,51 @@ async function renderServiceSelector() {
     .join("");
 }
 
-// --- LOGIQUE DÉCOUPAGE ---
+// AFFICHAGE DES AVIS SUR LE SITE
+async function loadReviewsCarousel() {
+  const wrapper = document.getElementById("scrolling-wrapper-dynamic");
+  if (!wrapper) return;
+
+  const { data: reviews } = await appClient
+    .from("reviews")
+    .select("*")
+    .eq("approved", true) // SEULS LES AVIS APPROUVÉS
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (!reviews || reviews.length === 0) return;
+
+  const cards = reviews
+    .map(
+      (r) => `
+        <div class="w-[300px] md:w-[350px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0 mx-2 snap-center">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">
+                    ${r.customer_name.charAt(0)}
+                </div>
+                <div>
+                    <div class="font-bold text-[#002050]">${
+                      r.customer_name
+                    }</div>
+                    <div class="text-xs text-slate-400">${
+                      r.car_model || "Client"
+                    }</div>
+                </div>
+                <div class="ml-auto text-orange-400 text-xs">
+                    <i class="fa-solid fa-star"></i> ${r.rating}/5
+                </div>
+            </div>
+            <p class="text-slate-500 text-sm leading-relaxed line-clamp-4">"${
+              r.comment
+            }"</p>
+        </div>
+    `
+    )
+    .join("");
+
+  wrapper.innerHTML = cards; // Pas de duplication pour le moment, simple affichage
+}
+
 window.onDateChanged = async function () {
   const dateInput = document.getElementById("date-picker").value;
   if (!dateInput || !currentService) return;
@@ -590,21 +647,16 @@ window.onDateChanged = async function () {
 
   rawSlots.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-  // Pour chaque grand créneau ouvert par l'admin (ex: 8h-20h)
   rawSlots.forEach((slot) => {
     let cursor = new Date(slot.start_time);
     let limit = new Date(slot.end_time);
 
-    // On avance par tranche de 30min
     while (cursor.getTime() + duration * 60000 <= limit.getTime()) {
       const startAttempt = new Date(cursor);
       const endAttempt = new Date(cursor.getTime() + duration * 60000);
-
-      // On vérifie si ÇA TOUCHE un RDV existant
       const isBusy = busyBookings.some((b) => {
         const bStart = new Date(b.start_time);
         const bEnd = new Date(b.end_time);
-        // Chevauchement : Début < FinRDV ET Fin > DébutRDV
         return startAttempt < bEnd && endAttempt > bStart;
       });
 
@@ -625,7 +677,6 @@ window.onDateChanged = async function () {
     container.innerHTML =
       '<div class="col-span-3 text-center text-orange-400 py-2">Complet.</div>';
   } else {
-    // Tri final et affichage
     availableTimes.sort((a, b) => a.label.localeCompare(b.label));
     container.innerHTML = availableTimes
       .map(
@@ -704,7 +755,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       closeModal("modal-confirm");
       pendingAction = null;
     });
+
+  // 1. Charger Auth
   await checkAuth();
+
+  // 2. Charger les avis publics
+  loadReviewsCarousel();
+
+  // 3. Logique Login
   if (document.getElementById("login-form"))
     document
       .getElementById("login-form")
@@ -718,9 +776,69 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById("login-error").classList.remove("hidden");
         else window.location.href = "admin.html";
       });
+
+  // 4. Logique Booking
   if (document.getElementById("booking-page")) {
     renderServiceSelector();
     const dp = document.getElementById("date-picker");
     if (dp) dp.min = new Date().toISOString().split("T")[0];
+  }
+
+  // 5. Logique Envoi Avis (Formulaire)
+  const reviewForm = document.getElementById("review-form");
+  if (reviewForm) {
+    const stars = document.querySelectorAll("#star-container i");
+    const ratingInput = document.getElementById("rating-value");
+    stars.forEach((star) => {
+      star.addEventListener("click", () => {
+        const val = star.getAttribute("data-value");
+        ratingInput.value = val;
+        stars.forEach((s) => {
+          if (s.getAttribute("data-value") <= val) {
+            s.classList.remove("fa-regular");
+            s.classList.add("fa-solid", "text-orange-400");
+          } else {
+            s.classList.remove("fa-solid", "text-orange-400");
+            s.classList.add("fa-regular");
+          }
+        });
+      });
+    });
+    reviewForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const rating = ratingInput.value;
+      if (!rating) return alert("Notez la prestation svp !");
+
+      const btn = document.getElementById("btn-submit-review");
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi...';
+      btn.disabled = true;
+
+      const { error } = await appClient.from("reviews").insert([
+        {
+          customer_name: document.getElementById("review-name").value,
+          car_model: document.getElementById("review-car").value,
+          comment: document.getElementById("review-comment").value,
+          rating: parseInt(rating),
+          approved: false, // Doit être validé par admin
+        },
+      ]);
+
+      if (!error) {
+        reviewForm.reset();
+        stars.forEach((s) => {
+          s.classList.remove("fa-solid", "text-orange-400");
+          s.classList.add("fa-regular");
+        });
+        const successMsg = document.getElementById("review-success");
+        if (successMsg) successMsg.classList.remove("hidden");
+        reviewForm.classList.add("hidden");
+        showNotification("Avis envoyé ! Merci.", "success");
+      } else {
+        alert("Erreur: " + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    });
   }
 });
