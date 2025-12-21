@@ -1,8 +1,6 @@
 // =============================================================================
-// 1. CONFIGURATION & INITIALISATION
+// 1. CONFIGURATION
 // =============================================================================
-
-// CLÉS SUPABASE
 const SB_URL = "https://kpndqsranyqwcjzggfyu.supabase.co";
 const SB_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwbmRxc3Jhbnlxd2NqemdnZnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTA5MTEsImV4cCI6MjA3NjUyNjkxMX0.XJ5cj5nrv7VyQsStFe-N6rByU34bmkFMneWj3Jv42yI";
@@ -14,12 +12,10 @@ try {
     appClient = window.supabase.createClient(SB_URL, SB_KEY);
     console.log("✅ Système Fixt connecté.");
   } else {
-    console.error(
-      "❌ ERREUR CRITIQUE : La librairie Supabase n'est pas chargée."
-    );
+    console.error("❌ ERREUR: Supabase non chargé.");
   }
 } catch (err) {
-  console.error("❌ Erreur d'initialisation :", err);
+  console.error("❌ Erreur init:", err);
 }
 
 const STATUS_COLORS = {
@@ -29,13 +25,11 @@ const STATUS_COLORS = {
 };
 
 // =============================================================================
-// 2. UI UTILS (MODALES & NOTIFS)
+// 2. UI UTILS
 // =============================================================================
-
 window.showNotification = function (message, type = "success") {
   const container = document.getElementById("toast-container");
   if (!container) return alert(message);
-
   const styles = {
     success: {
       bg: "bg-emerald-500/90",
@@ -47,18 +41,11 @@ window.showNotification = function (message, type = "success") {
       border: "border-red-400",
       icon: '<i class="fa-solid fa-triangle-exclamation"></i>',
     },
-    info: {
-      bg: "bg-blue-500/90",
-      border: "border-blue-400",
-      icon: '<i class="fa-solid fa-circle-info"></i>',
-    },
   };
-
   const style = styles[type] || styles.success;
   const toast = document.createElement("div");
   toast.className = `pointer-events-auto flex items-center gap-4 px-6 py-4 rounded-xl border ${style.border} ${style.bg} text-white shadow-2xl backdrop-blur-md mb-3 transition-all duration-500 transform translate-y-10 opacity-0`;
   toast.innerHTML = `<div class="text-xl">${style.icon}</div><div class="font-bold text-sm drop-shadow-md">${message}</div>`;
-
   container.appendChild(toast);
   requestAnimationFrame(() =>
     toast.classList.remove("translate-y-10", "opacity-0")
@@ -87,9 +74,8 @@ window.showConfirm = function (message, callback) {
 };
 
 // =============================================================================
-// 3. NAVIGATION & SÉCURITÉ
+// 3. NAVIGATION
 // =============================================================================
-
 window.switchTab = function (tabName) {
   document
     .querySelectorAll('[id^="view-"]')
@@ -110,9 +96,11 @@ window.switchTab = function (tabName) {
   if (tabName === "calendar") setTimeout(initAdminCalendar, 100);
 };
 
+// =============================================================================
+// 4. AUTH & ADMIN
+// =============================================================================
 async function checkAuth() {
   if (!appClient) return;
-
   const isAdminPage =
     document.getElementById("view-dashboard") ||
     document.querySelector(".glass-sidebar");
@@ -127,27 +115,25 @@ async function checkAuth() {
       document.body.style.setProperty("display", "flex", "important");
       renderAdminStats();
       renderAllBookingsView();
-      // Listener pour form slot
       const slotForm = document.getElementById("form-edit-slot");
       if (slotForm) slotForm.addEventListener("submit", handleSaveSlot);
     }
-  } else if (isLoginPage) {
-    if (session) window.location.href = "admin.html";
+  } else if (isLoginPage && session) {
+    window.location.href = "admin.html";
   }
 }
 
 window.logout = function () {
-  showConfirm("Voulez-vous vraiment vous déconnecter ?", async () => {
+  showConfirm("Se déconnecter ?", async () => {
     await appClient.auth.signOut();
     window.location.href = "login.html";
   });
 };
 
 // =============================================================================
-// 4. LOGIQUE ADMIN - CALENDRIER (FULLCALENDAR)
+// 5. CALENDRIER (FULLCALENDAR)
 // =============================================================================
 let calendar = null;
-
 async function initAdminCalendar() {
   const calendarEl = document.getElementById("calendar");
   if (!calendarEl) return;
@@ -172,40 +158,34 @@ async function initAdminCalendar() {
       right: "timeGridWeek,timeGridDay",
     },
 
-    // CRÉATION DE CRÉNEAU AU CLICK/GLISSÉ
     select: async function (info) {
       const { error } = await appClient
         .from("slots")
         .insert([{ start_time: info.startStr, end_time: info.endStr }]);
       if (!error) {
         calendar.refetchEvents();
-        showNotification("Créneau disponible ajouté", "info");
+        showNotification("Créneau ajouté", "info");
       }
       calendar.unselect();
     },
 
     events: async function (info, successCallback, failureCallback) {
       try {
-        // 1. Récupérer les SLOTS (Dispos)
         const { data: slots } = await appClient
           .from("slots")
           .select("*")
           .gte("end_time", info.startStr)
           .lte("start_time", info.endStr);
-
-        // 2. Récupérer les BOOKINGS (Réservations)
         const { data: bookings } = await appClient
           .from("bookings")
           .select("*")
           .gte("end_time", info.startStr)
           .lte("start_time", info.endStr);
 
-        let combinedEvents = [];
-
-        // Affichage des Slots (Vert)
+        let combined = [];
         if (slots)
-          slots.forEach((s) => {
-            combinedEvents.push({
+          slots.forEach((s) =>
+            combined.push({
               id: "slot_" + s.id,
               title: "DISPO",
               start: s.start_time,
@@ -213,47 +193,38 @@ async function initAdminCalendar() {
               backgroundColor: "rgba(16, 185, 129, 0.1)",
               borderColor: "#10b981",
               textColor: "#10b981",
-              classNames: ["cursor-pointer"],
               extendedProps: { type: "slot", dbId: s.id },
-            });
-          });
-
-        // Affichage des RDV (Couleur selon statut)
+            })
+          );
         if (bookings)
           bookings.forEach((b) => {
             const st = b.status || "pending";
-            const colors = STATUS_COLORS[st] || STATUS_COLORS.pending;
-            combinedEvents.push({
+            const c = STATUS_COLORS[st] || STATUS_COLORS.pending;
+            combined.push({
               id: "booking_" + b.id,
               title: b.customer_name,
               start: b.start_time,
               end: b.end_time,
-              backgroundColor: colors.bg,
-              borderColor: colors.border,
-              textColor: colors.text,
-              classNames: ["cursor-pointer"],
+              backgroundColor: c.bg,
+              borderColor: c.border,
+              textColor: c.text,
               extendedProps: { type: "booking", dbId: b.id },
             });
           });
-        successCallback(combinedEvents);
+        successCallback(combined);
       } catch (e) {
         failureCallback(e);
       }
     },
-
     eventClick: function (info) {
-      const props = info.event.extendedProps;
-      if (props.type === "slot") openSlotModal(info.event);
-      // Pour les bookings, on pourrait aussi ouvrir une modale de détails ici
+      if (info.event.extendedProps.type === "slot") openSlotModal(info.event);
     },
   });
   calendar.render();
 }
 
 function openSlotModal(event) {
-  const props = event.extendedProps;
-  document.getElementById("slot-id").value = props.dbId;
-  // Conversion Date -> Input DateTimeLocal
+  document.getElementById("slot-id").value = event.extendedProps.dbId;
   const format = (d) =>
     new Date(d.getTime() - d.getTimezoneOffset() * 60000)
       .toISOString()
@@ -266,119 +237,41 @@ function openSlotModal(event) {
 window.handleSaveSlot = async function (e) {
   e.preventDefault();
   const id = document.getElementById("slot-id").value;
-  const start = new Date(
-    document.getElementById("slot-start").value
-  ).toISOString();
-  const end = new Date(document.getElementById("slot-end").value).toISOString();
-
+  const s = new Date(document.getElementById("slot-start").value).toISOString();
+  const en = new Date(document.getElementById("slot-end").value).toISOString();
   const { error } = await appClient
     .from("slots")
-    .update({ start_time: start, end_time: end })
+    .update({ start_time: s, end_time: en })
     .eq("id", id);
   if (!error) {
     closeModal("modal-slot");
-    if (calendar) calendar.refetchEvents();
+    calendar.refetchEvents();
     showNotification("Créneau modifié", "success");
   }
 };
 
 window.handleDeleteSlot = function () {
+  // ICI : ON FERME LA PREMIÈRE MODALE AVANT D'OUVRIR LA CONFIRMATION
+  closeModal("modal-slot");
   showConfirm("Supprimer ce créneau ?", async () => {
     const id = document.getElementById("slot-id").value;
     const { error } = await appClient.from("slots").delete().eq("id", id);
     if (!error) {
-      closeModal("modal-slot");
-      if (calendar) calendar.refetchEvents();
+      calendar.refetchEvents();
       showNotification("Créneau supprimé", "success");
     }
   });
 };
 
 // =============================================================================
-// 5. LOGIQUE ADMIN - AVIS & AUTRES
+// 6. DONNÉES & CRUD
 // =============================================================================
-
-async function renderReviewsView() {
-  const tbody = document.getElementById("reviews-table-body");
-  if (!tbody) return;
-  tbody.innerHTML =
-    '<tr><td colspan="6" class="text-center p-4"><i class="fa-solid fa-spinner fa-spin text-[#5475FF]"></i></td></tr>';
-
-  const { data: reviews } = await appClient
-    .from("reviews")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (!reviews || reviews.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="6" class="text-center p-4 text-slate-500">Aucun avis.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = reviews
-    .map((r) => {
-      const stars = Array(5)
-        .fill(0)
-        .map((_, i) =>
-          i < r.rating
-            ? '<i class="fa-solid fa-star text-orange-400 text-xs"></i>'
-            : '<i class="fa-regular fa-star text-slate-600 text-xs"></i>'
-        )
-        .join("");
-      const statusBadge = r.approved
-        ? '<span class="status-badge status-confirmed">Publié</span>'
-        : '<span class="status-badge status-pending">Masqué</span>';
-
-      const toggleIcon = r.approved ? "fa-eye-slash" : "fa-check";
-      const toggleTitle = r.approved ? "Masquer" : "Publier";
-
-      return `
-        <tr class="hover:bg-white/5 transition border-b border-white/5">
-            <td class="p-3 text-sm text-slate-400">${new Date(
-              r.created_at
-            ).toLocaleDateString()}</td>
-            <td class="p-3"><div class="font-bold text-white">${
-              r.customer_name
-            }</div><div class="text-xs text-slate-500">${
-        r.car_model || "-"
-      }</div></td>
-            <td class="p-3"><div class="flex gap-1">${stars}</div></td>
-            <td class="p-3 text-sm text-slate-300 italic">"${r.comment}"</td>
-            <td class="p-3">${statusBadge}</td>
-            <td class="p-3 text-right">
-                <button onclick="toggleReviewStatus('${
-                  r.id
-                }', ${!r.approved})" class="w-8 h-8 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg mr-2" title="${toggleTitle}"><i class="fa-solid ${toggleIcon}"></i></button>
-                <button onclick="deleteReview('${
-                  r.id
-                }')" class="w-8 h-8 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        </tr>`;
-    })
-    .join("");
+async function fetchServices() {
+  const { data } = await appClient.from("services").select("*").order("price");
+  return data || [];
 }
 
-window.toggleReviewStatus = async function (id, newStatus) {
-  const { error } = await appClient
-    .from("reviews")
-    .update({ approved: newStatus })
-    .eq("id", id);
-  if (!error) {
-    renderReviewsView();
-    showNotification(newStatus ? "Avis publié" : "Avis masqué", "success");
-  }
-};
-
-window.deleteReview = function (id) {
-  showConfirm("Supprimer cet avis ?", async () => {
-    await appClient.from("reviews").delete().eq("id", id);
-    renderReviewsView();
-    showNotification("Avis supprimé", "success");
-  });
-};
-
 async function renderAdminStats() {
-  // Rechargement stats & services comme avant...
   if (document.getElementById("stat-revenue")) {
     const { data: bookings } = await appClient.from("bookings").select("*");
     if (bookings) {
@@ -389,34 +282,84 @@ async function renderAdminStats() {
   }
   const srvList = document.getElementById("admin-services-list");
   if (srvList) {
-    const { data: services } = await appClient
-      .from("services")
-      .select("*")
-      .order("price");
-    if (services) {
-      if (document.getElementById("count-services"))
-        document.getElementById("count-services").innerText = services.length;
-      srvList.innerHTML = services
-        .map(
-          (s) => `
-                <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                    <div><div class="font-bold text-white">${s.name}</div><div class="text-xs text-slate-400">${s.duration} min</div></div>
-                    <button onclick="dbDeleteService(${s.id})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                </div>`
-        )
-        .join("");
-    }
+    const services = await fetchServices();
+    if (document.getElementById("count-services"))
+      document.getElementById("count-services").innerText = services.length;
+    srvList.innerHTML = services
+      .map(
+        (s) => `
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                <div><div class="font-bold text-white">${s.name}</div><div class="text-xs text-slate-400">${s.duration} min</div></div>
+                <div class="flex gap-3 items-center"><span class="text-[#5475FF] font-bold">${s.price}€</span><button onclick="dbDeleteService(${s.id})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>
+            </div>`
+      )
+      .join("");
   }
 }
 
-// ... (Le reste des fonctions dbFetchBookings, renderAllBookingsView, handleAddService, etc. restent identiques à la version précédente) ...
+async function renderReviewsView() {
+  const tbody = document.getElementById("reviews-table-body");
+  if (!tbody) return;
+  tbody.innerHTML =
+    '<tr><td colspan="6" class="text-center p-4"><i class="fa-solid fa-spinner fa-spin text-[#5475FF]"></i></td></tr>';
+  const { data: reviews } = await appClient
+    .from("reviews")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (!reviews || reviews.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" class="text-center p-4 text-slate-500">Aucun avis.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = reviews
+    .map(
+      (r) => `
+        <tr class="hover:bg-white/5 transition border-b border-white/5">
+            <td class="p-3 text-sm text-slate-400">${new Date(
+              r.created_at
+            ).toLocaleDateString()}</td>
+            <td class="p-3"><div class="font-bold text-white">${
+              r.customer_name
+            }</div></td>
+            <td class="p-3 text-orange-400 font-bold">${r.rating}/5</td>
+            <td class="p-3 text-sm text-slate-300 italic">"${r.comment}"</td>
+            <td class="p-3">${
+              r.approved
+                ? '<span class="status-badge status-confirmed">Publié</span>'
+                : '<span class="status-badge status-pending">Masqué</span>'
+            }</td>
+            <td class="p-3 text-right">
+                <button onclick="toggleReviewStatus('${
+                  r.id
+                }', ${!r.approved})" class="mr-2 text-blue-400"><i class="fa-solid ${
+        r.approved ? "fa-eye-slash" : "fa-check"
+      }"></i></button>
+                <button onclick="deleteReview('${
+                  r.id
+                }')" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>`
+    )
+    .join("");
+}
+
+window.toggleReviewStatus = async function (id, newStatus) {
+  await appClient.from("reviews").update({ approved: newStatus }).eq("id", id);
+  renderReviewsView();
+};
+window.deleteReview = function (id) {
+  showConfirm("Supprimer ?", async () => {
+    await appClient.from("reviews").delete().eq("id", id);
+    renderReviewsView();
+  });
+};
+
 async function dbFetchBookings() {
   return await appClient
     .from("bookings")
     .select("*")
     .order("start_time", { ascending: false });
 }
-
 async function renderAllBookingsView() {
   const tbody = document.getElementById("all-bookings-table-body");
   if (!tbody) return;
@@ -453,11 +396,9 @@ async function renderAllBookingsView() {
 
 window.quickAction = function (id, action) {
   if (action === "delete")
-    showConfirm("Supprimer ce RDV ?", async () => {
+    showConfirm("Supprimer ?", async () => {
       await appClient.from("bookings").delete().eq("id", id);
       renderAllBookingsView();
-      renderAdminStats();
-      if (calendar) calendar.refetchEvents();
     });
 };
 
@@ -482,8 +423,167 @@ window.dbDeleteService = function (id) {
 };
 
 // =============================================================================
-// 6. INITIALISATION
+// 7. CLIENT SIDE (BOOKING)
 // =============================================================================
+let currentService = null;
+window.selectService = function (id, name, price, duration, element) {
+  document
+    .querySelectorAll(".service-card")
+    .forEach((el) =>
+      el.classList.remove("ring-2", "ring-[#5475FF]", "bg-white", "shadow-lg")
+    );
+  element.classList.add("ring-2", "ring-[#5475FF]", "bg-white", "shadow-lg");
+  currentService = { id, name, price, duration };
+  document.getElementById("summary-service").innerText = name;
+  document.getElementById("total-price-display").innerText = price + "€";
+  document
+    .getElementById("date-step")
+    .classList.remove("opacity-50", "pointer-events-none");
+  if (document.getElementById("date-picker").value) onDateChanged();
+};
+
+async function renderServiceSelector() {
+  const container = document.getElementById("service-selector-container");
+  if (!container) return;
+  container.innerHTML =
+    '<div class="text-center py-4 text-blue-300"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</div>';
+
+  // VERIFICATION: Si la liste est vide, c'est sûrement qu'il n'y a plus de services en base
+  const services = await fetchServices();
+  if (services.length === 0) {
+    container.innerHTML =
+      "<p class='text-center text-red-400 bg-red-50 p-2 rounded'>Aucun service disponible.<br><span class='text-xs text-slate-500'>Veuillez en ajouter via le panel Admin.</span></p>";
+    return;
+  }
+
+  container.innerHTML = services
+    .map((s) => {
+      const safeName = s.name.replace(/'/g, "\\'");
+      return `
+        <div onclick="selectService(${s.id}, '${safeName}', ${s.price}, ${s.duration}, this)" 
+             class="service-card border border-white/20 bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition mb-2 flex justify-between items-center group">
+             <div><div class="font-bold text-white text-lg">${s.name}</div><div class="text-xs text-blue-300 font-medium">${s.duration} min</div></div>
+             <div class="font-bold text-[#5475FF] bg-blue-50 px-3 py-1 rounded-lg shadow-sm">${s.price}€</div>
+        </div>`;
+    })
+    .join("");
+}
+
+window.onDateChanged = async function () {
+  const dateInput = document.getElementById("date-picker").value;
+  if (!dateInput || !currentService) return;
+  const container = document.getElementById("slots-container");
+  const loader = document.getElementById("slots-loader");
+  if (loader) loader.classList.remove("hidden");
+  container.innerHTML = "";
+  document
+    .getElementById("slots-step")
+    .classList.remove("opacity-50", "pointer-events-none");
+
+  const startDay = new Date(dateInput);
+  startDay.setHours(0, 0, 0, 0);
+  const endDay = new Date(dateInput);
+  endDay.setHours(23, 59, 59, 999);
+
+  const { data: rawSlots } = await appClient
+    .from("slots")
+    .select("*")
+    .gte("end_time", startDay.toISOString())
+    .lte("start_time", endDay.toISOString());
+  const { data: busyBookings } = await appClient
+    .from("bookings")
+    .select("*")
+    .gte("end_time", startDay.toISOString())
+    .lte("start_time", endDay.toISOString());
+
+  if (loader) loader.classList.add("hidden");
+  if (!rawSlots || rawSlots.length === 0) {
+    container.innerHTML =
+      '<div class="col-span-3 text-center text-slate-400 py-2">Aucune disponibilité.</div>';
+    return;
+  }
+
+  rawSlots.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+  let html = "";
+  rawSlots.forEach((slot) => {
+    const timeStr = new Date(slot.start_time).toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const slotStart = new Date(slot.start_time);
+    const slotEnd = new Date(slot.end_time);
+    const isBusy = busyBookings.some((b) => {
+      const bS = new Date(b.start_time);
+      const bE = new Date(b.end_time);
+      return slotStart < bE && slotEnd > bS;
+    });
+    if (!isBusy)
+      html += `<div class="time-slot" onclick="selectTime('${timeStr}', '${slot.start_time}', this)">${timeStr}</div>`;
+  });
+  container.innerHTML =
+    html ||
+    '<div class="col-span-3 text-center text-orange-400 py-2">Complet.</div>';
+  const [y, m, d] = dateInput.split("-");
+  document.getElementById("summary-date").innerText = new Date(
+    y,
+    m - 1,
+    d
+  ).toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+};
+
+window.selectTime = function (timeStr, isoStart, element) {
+  document
+    .querySelectorAll(".time-slot")
+    .forEach((el) => el.classList.remove("selected"));
+  element.classList.add("selected");
+  document.getElementById("final-time").value = timeStr;
+  document.getElementById("summary-time").innerText = " à " + timeStr;
+  window.selectedSlotIso = isoStart;
+  const btn = document.getElementById("pay-btn");
+  btn.disabled = false;
+  btn.classList.remove("opacity-50", "cursor-not-allowed");
+};
+
+window.handlePayment = async function (e) {
+  e.preventDefault();
+  const btn = document.getElementById("pay-btn");
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Traitement...';
+  btn.disabled = true;
+  if (!window.selectedSlotIso) return;
+  const start = new Date(window.selectedSlotIso);
+  const end = new Date(start.getTime() + currentService.duration * 60000);
+  const { error } = await appClient.from("bookings").insert([
+    {
+      customer_name: (
+        document.getElementById("prenom").value +
+        " " +
+        document.getElementById("nom").value
+      ).trim(),
+      email: document.getElementById("email").value,
+      car_model: document.getElementById("modele").value,
+      phone: document.getElementById("tel").value,
+      service_name: currentService.name,
+      price: currentService.price,
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      status: "pending",
+    },
+  ]);
+  if (!error) {
+    showNotification("RDV Confirmé !", "success");
+    setTimeout(() => (window.location.href = "index.html"), 2000);
+  } else {
+    alert("Erreur: " + error.message);
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
   const btnConfirm = document.getElementById("btn-confirm-action");
   if (btnConfirm)
@@ -492,25 +592,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       closeModal("modal-confirm");
       pendingAction = null;
     });
-
   await checkAuth();
-
-  // Login logic
-  const loginForm = document.getElementById("login-form");
-  if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const { error } = await appClient.auth.signInWithPassword({
-        email: document.getElementById("email").value,
-        password: document.getElementById("password").value,
+  if (document.getElementById("login-form"))
+    document
+      .getElementById("login-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const { error } = await appClient.auth.signInWithPassword({
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value,
+        });
+        if (error)
+          document.getElementById("login-error").classList.remove("hidden");
+        else window.location.href = "admin.html";
       });
-      if (error)
-        document.getElementById("login-error").classList.remove("hidden");
-      else window.location.href = "admin.html";
-    });
-  }
-
-  // Client side logic (Booking + Review form)
   if (document.getElementById("booking-page")) {
     renderServiceSelector();
     const dp = document.getElementById("date-picker");
