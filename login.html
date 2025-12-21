@@ -5,161 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fixt. - Connexion Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
     <link rel="stylesheet" href="style.css" />
     <style>
       body {
         background-color: #020617;
         color: #e2e8f0;
-        overflow: hidden;
       }
-
-      /* Grille de fond */
-      .bg-grid {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        background-image: linear-gradient(
-            to right,
-            rgba(255, 255, 255, 0.03) 1px,
-            transparent 1px
-          ),
-          linear-gradient(
-            to bottom,
-            rgba(255, 255, 255, 0.03) 1px,
-            transparent 1px
-          );
-        background-size: 40px 40px;
-      }
-
-      /* Effet Verre */
       .glass {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-      }
-
-      /* Animation d'entrée */
-      .fade-up {
-        animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      @keyframes fadeUp {
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
       }
     </style>
   </head>
-  <body
-    class="flex items-center justify-center h-screen font-sans selection:bg-[#5475FF] selection:text-white"
-  >
-    <div class="bg-grid"></div>
+  <body class="flex items-center justify-center h-screen font-sans">
     <div
       class="fixed top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#5475FF] rounded-full blur-[150px] opacity-20 pointer-events-none"
     ></div>
-    <div
-      class="fixed bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-900 rounded-full blur-[150px] opacity-20 pointer-events-none"
-    ></div>
 
-    <div class="w-full max-w-md p-8 glass rounded-3xl relative z-10 fade-up">
+    <div class="w-full max-w-md p-8 glass rounded-3xl relative z-10">
       <div class="text-center mb-10">
         <img
           src="img/logo.png"
           alt="Fixt"
-          class="h-16 mx-auto mb-6 brightness-0 invert drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+          class="h-16 mx-auto mb-6 brightness-0 invert"
         />
-        <h1 class="text-2xl font-bold text-white tracking-wide">
-          Espace Administrateur
-        </h1>
-        <p class="text-sm text-gray-500 mt-2">
-          Veuillez vous identifier pour accéder au dashboard.
-        </p>
+        <h1 class="text-2xl font-bold text-white">Espace Administrateur</h1>
       </div>
 
       <form id="login-form" class="space-y-6">
-        <div class="space-y-2">
-          <label
-            class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1"
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase ml-1"
             >Email</label
           >
-          <div class="relative group">
-            <div
-              class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
-            >
-              <i
-                class="fa-regular fa-envelope text-gray-500 group-focus-within:text-[#5475FF] transition-colors"
-              ></i>
-            </div>
-            <input
-              type="email"
-              id="email"
-              required
-              class="w-full bg-black/30 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-white placeholder-gray-600 outline-none focus:border-[#5475FF] focus:ring-1 focus:ring-[#5475FF] transition-all"
-              placeholder="admin@fixt.fr"
-            />
-          </div>
+          <input
+            type="email"
+            id="email"
+            required
+            class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white outline-none focus:border-[#5475FF]"
+            placeholder="admin@fixt.fr"
+          />
         </div>
-
-        <div class="space-y-2">
-          <label
-            class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1"
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase ml-1"
             >Mot de passe</label
           >
-          <div class="relative group">
-            <div
-              class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
-            >
-              <i
-                class="fa-solid fa-lock text-gray-500 group-focus-within:text-[#5475FF] transition-colors"
-              ></i>
-            </div>
-            <input
-              type="password"
-              id="password"
-              required
-              class="w-full bg-black/30 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-white placeholder-gray-600 outline-none focus:border-[#5475FF] focus:ring-1 focus:ring-[#5475FF] transition-all"
-              placeholder="••••••••"
-            />
-          </div>
+          <input
+            type="password"
+            id="password"
+            required
+            class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white outline-none focus:border-[#5475FF]"
+            placeholder="••••••••"
+          />
         </div>
-
-        <div
-          id="login-error"
-          class="hidden text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20"
-        >
-          <i class="fa-solid fa-circle-exclamation mr-1"></i> Identifiants
-          incorrects
+        <div id="login-error" class="hidden text-red-400 text-sm text-center">
+          Identifiants incorrects
         </div>
-
         <button
           type="submit"
-          class="w-full bg-[#5475FF] hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(84,117,255,0.3)] hover:shadow-[0_0_30px_rgba(84,117,255,0.5)] transform hover:-translate-y-1 transition-all duration-300"
+          class="w-full bg-[#5475FF] hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all"
         >
-          Se Connecter <i class="fa-solid fa-arrow-right ml-2"></i>
+          Se Connecter
         </button>
       </form>
-
       <div class="mt-8 text-center">
-        <a
-          href="index.html"
-          class="text-sm text-gray-500 hover:text-white transition-colors"
+        <a href="index.html" class="text-sm text-gray-500 hover:text-white"
+          >Retour au site</a
         >
-          <i class="fa-solid fa-arrow-left mr-1"></i> Retour au site
-        </a>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
