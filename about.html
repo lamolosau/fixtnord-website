@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
@@ -18,7 +18,8 @@
       /* --- THEME SPECIFIQUE ABOUT --- */
       body {
         background-color: #f8fafc;
-        background-image: radial-gradient(
+        background-image:
+          radial-gradient(
             at 0% 0%,
             rgba(84, 117, 255, 0.1) 0px,
             transparent 50%
@@ -288,14 +289,14 @@
           <div class="relative z-10">
             <h2 class="text-3xl font-bold text-white mb-6">Convaincu ?</h2>
             <p class="text-blue-200 mb-8 max-w-lg mx-auto">
-              Consultez nos disponibilités en temps réel et réservez votre
-              créneau d'installation en moins de 2 minutes.
+              Commandez votre matériel et appelez-nous pour fixer rapidement une
+              date d'installation.
             </p>
             <a
               href="booking.html"
               class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-[#002050] bg-white rounded-xl hover:bg-blue-50 transition-all shadow-lg hover:scale-105"
             >
-              Accéder au planning
+              Voir nos offres
               <i class="fa-solid fa-arrow-right ml-2"></i>
             </a>
           </div>
@@ -412,7 +413,7 @@
     <div
       id="legal-modal"
       class="legal-modal"
-      onclick="if(event.target===this) closeLegal()"
+      onclick="if (event.target === this) closeLegal();"
     >
       <div class="legal-content">
         <span onclick="closeLegal()" class="close-legal">&times;</span>

@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fixt. - Réservation</title>
+    <title>Fixt. - Commander une pièce</title>
     <link rel="icon" type="image/png" href="img/favicon.png" />
-
     <link rel="apple-touch-icon" href="img/favicon.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link
@@ -13,14 +12,6 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
     <link rel="stylesheet" href="style.css" />
-    <style>
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      input[type="date"] {
-        color-scheme: dark;
-      }
-    </style>
   </head>
   <body
     class="flex flex-col min-h-screen bg-[#F8FAFC] font-sans text-slate-800"
@@ -34,7 +25,11 @@
           alt="Fixt Logo"
           class="h-20 w-auto object-contain"
       /></a>
-      <a href="index.html" class="text-slate-500 font-bold text-sm">Retour</a>
+      <a
+        href="index.html"
+        class="text-slate-500 font-bold text-sm hover:text-slate-800 transition"
+        >Retour</a
+      >
     </nav>
 
     <main
@@ -47,98 +42,135 @@
         <div
           class="lg:w-2/5 bg-[#002050] p-8 md:p-12 text-white flex flex-col relative overflow-hidden"
         >
-          <h1 class="text-3xl font-extrabold mb-10">
-            Votre installation<br /><span class="text-[#5475FF]"
-              >commence ici.</span
-            >
+          <h1 class="text-3xl font-extrabold mb-8">
+            Votre pièce<br /><span class="text-[#5475FF]">CarPlay.</span>
           </h1>
 
-          <div id="service-step" class="mb-6">
+          <div class="mb-8 p-5 bg-white/10 rounded-2xl border border-white/20">
             <label class="text-xs font-bold uppercase text-blue-300 mb-2 block"
-              >1. Choisissez la prestation</label
+              >Recherche par plaque</label
             >
-            <div id="service-selector-container" class="space-y-2"></div>
-          </div>
-
-          <div
-            id="date-step"
-            class="opacity-50 pointer-events-none mb-6 transition-all"
-          >
-            <label class="text-xs font-bold uppercase text-blue-300 mb-2 block"
-              >2. Date d'intervention</label
-            >
-            <input
-              type="date"
-              id="date-picker"
-              onchange="onDateChanged()"
-              class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] cursor-pointer"
-            />
-          </div>
-
-          <div
-            id="slots-step"
-            class="flex-1 flex flex-col opacity-50 pointer-events-none transition-all"
-          >
-            <label class="text-xs font-bold uppercase text-blue-300 mb-2 block"
-              >3. Heure</label
-            >
-            <div id="slots-loader" class="hidden text-sm text-blue-300">
-              Recherche...
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="plate-input"
+                placeholder="AA-123-BB"
+                class="flex-1 bg-white border border-white/20 rounded-xl p-3 text-[#002050] font-bold uppercase outline-none focus:ring-2 focus:ring-[#5475FF] placeholder-slate-400"
+              />
+              <button
+                onclick="handlePlateLookup()"
+                class="bg-[#5475FF] hover:bg-blue-600 px-5 rounded-xl transition-all"
+              >
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
             </div>
+            <p
+              class="text-[11px] text-blue-200 mt-2 italic text-center opacity-80"
+            >
+              Remplissage automatique bientôt disponible
+            </p>
+          </div>
+
+          <div class="flex items-center gap-4 mb-6 opacity-40">
+            <div class="flex-1 h-px bg-white"></div>
+            <div class="text-xs font-bold uppercase text-center">
+              Ou manuellement
+            </div>
+            <div class="flex-1 h-px bg-white"></div>
+          </div>
+
+          <div id="selectors-container" class="mb-6 space-y-4">
+            <div>
+              <label
+                class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+                >Marque</label
+              >
+              <select
+                id="select-brand"
+                class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] appearance-none cursor-pointer"
+              >
+                <option value="" disabled selected>
+                  Chargement du catalogue...
+                </option>
+              </select>
+            </div>
+            <div>
+              <label
+                class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+                >Modèle</label
+              >
+              <select
+                id="select-model"
+                disabled
+                class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] appearance-none cursor-pointer disabled:opacity-50"
+              >
+                <option value="" disabled selected>Choisir un modèle...</option>
+              </select>
+            </div>
+            <div>
+              <label
+                class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+                >Année</label
+              >
+              <select
+                id="select-year"
+                disabled
+                class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] appearance-none cursor-pointer disabled:opacity-50"
+              >
+                <option value="" disabled selected>Choisir l'année...</option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            id="catalog-result"
+            class="hidden mb-6 bg-white/10 border border-white/20 p-4 rounded-xl"
+          >
+            <div class="text-xs text-emerald-400 font-bold uppercase mb-1">
+              <i class="fa-solid fa-check mr-1"></i> Pièce compatible
+            </div>
+            <div class="font-bold text-lg mb-1" id="result-part-name">...</div>
             <div
-              id="slots-container"
-              class="grid grid-cols-3 gap-2 overflow-y-auto no-scrollbar pr-2 content-start h-32"
+              class="text-2xl font-extrabold text-[#5475FF]"
+              id="result-price"
             >
-              <div class="col-span-3 text-sm text-blue-300/50 italic">
-                En attente d'une date...
-              </div>
+              0€
             </div>
+          </div>
+
+          <div class="mt-auto pt-6 border-t border-white/10 text-center">
+            <p class="text-sm text-blue-200 mb-3">Véhicule introuvable ?</p>
+            <button
+              onclick="
+                document
+                  .getElementById('custom-request-modal')
+                  .classList.remove('hidden')
+              "
+              class="px-6 py-3 border-2 border-[#5475FF] text-[#5475FF] font-bold rounded-xl hover:bg-[#5475FF] hover:text-white transition-all w-full"
+            >
+              Demande sur mesure
+            </button>
           </div>
         </div>
 
         <div class="lg:w-3/5 p-8 md:p-14 bg-white flex flex-col justify-center">
           <h2 class="text-3xl font-extrabold text-[#002050] mb-2">
-            Finalisation
+            Finaliser l'achat
           </h2>
-          <p class="text-slate-500 mb-8">Vos coordonnées pour le RDV.</p>
+          <p class="text-slate-500 mb-8">
+            Vos coordonnées pour la livraison et l'installation.
+          </p>
 
           <form
             id="booking-form"
             onsubmit="handlePayment(event)"
             class="space-y-5"
           >
-            <div
-              class="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex items-center gap-5"
-            >
-              <div class="flex-1">
-                <div
-                  class="font-bold text-[#002050] text-lg"
-                  id="summary-service"
-                >
-                  Sélectionnez un service
-                </div>
-                <div class="text-sm text-[#5475FF] font-medium">
-                  <span id="summary-date">...</span>
-                  <span id="summary-time"></span>
-                </div>
-              </div>
-              <div
-                class="text-2xl font-extrabold text-[#002050]"
-                id="total-price-display"
-              >
-                0€
-              </div>
-            </div>
-
-            <input type="hidden" id="final-service-id" />
-            <input type="hidden" id="final-date" />
-            <input type="hidden" id="final-time" />
+            <input type="hidden" id="final-part-name" />
             <input type="hidden" id="final-price" />
+            <input type="hidden" id="final-vehicle" />
 
             <div class="space-y-3">
-              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
-                >Vos coordonnées</label
-              >
               <div class="grid grid-cols-2 gap-4">
                 <input
                   type="text"
@@ -180,48 +212,31 @@
               <input
                 type="text"
                 id="address"
-                placeholder="Adresse complète (Rue, Ville, Code Postal)"
+                placeholder="Adresse (Ville, Code Postal)"
                 required
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
               />
             </div>
 
-            <div class="space-y-3">
-              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
-                >Votre Véhicule</label
-              >
-              <div class="grid grid-cols-3 gap-3">
-                <input
-                  type="text"
-                  id="car-make"
-                  placeholder="Marque (ex: Audi)"
-                  required
-                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
-                />
-                <input
-                  type="text"
-                  id="car-model"
-                  placeholder="Modèle (ex: A3)"
-                  required
-                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
-                />
-                <input
-                  type="number"
-                  id="car-year"
-                  placeholder="Année"
-                  required
-                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
-                />
-              </div>
+            <div
+              class="bg-blue-50 border border-blue-100 p-4 rounded-xl text-sm text-[#002050] mt-6"
+            >
+              <p>
+                <strong>Paiement de la pièce :</strong> Aujourd'hui en ligne.
+              </p>
+              <p class="mt-1">
+                <strong>Main d'œuvre (100€) :</strong> À régler sur place le
+                jour J.
+              </p>
             </div>
 
             <button
               type="submit"
               id="pay-btn"
               disabled
-              class="w-full bg-[#5475FF] hover:bg-[#3b5bdb] text-white py-5 rounded-2xl font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-4"
+              class="w-full bg-[#002050] hover:bg-[#5475FF] text-white py-5 rounded-2xl font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-4"
             >
-              Confirmer le rendez-vous
+              Payer ma pièce
             </button>
           </form>
         </div>
@@ -229,17 +244,60 @@
     </main>
 
     <div
+      id="custom-request-modal"
+      class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-3xl p-8 max-w-md w-full relative">
+        <button
+          onclick="
+            document
+              .getElementById('custom-request-modal')
+              .classList.add('hidden')
+          "
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"
+        >
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-2xl font-bold text-[#002050] mb-2">
+          Véhicule spécifique
+        </h3>
+        <form onsubmit="handleCustomRequest(event)" class="space-y-4 mt-4">
+          <input
+            type="text"
+            id="custom-brand"
+            placeholder="Marque"
+            required
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none"
+          />
+          <input
+            type="text"
+            id="custom-model"
+            placeholder="Modèle"
+            required
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none"
+          />
+          <input
+            type="number"
+            id="custom-year"
+            placeholder="Année"
+            required
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none"
+          />
+          <button
+            type="submit"
+            class="w-full bg-[#5475FF] text-white font-bold py-4 rounded-xl shadow-lg"
+          >
+            Envoyer la demande
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div
       id="toast-container"
       class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"
     ></div>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="js/app-client.js"></script>
-    <script type="module">
-      import { handlePayment } from "./js/app-client.js"; // Assure-toi d'exporter handlePayment dans app-client
-      document
-        .getElementById("booking-form")
-        .addEventListener("submit", handlePayment);
-    </script>
   </body>
 </html>

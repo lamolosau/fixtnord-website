@@ -1,88 +1,19 @@
-// js/app-client.js
 import { supabase } from "./config.js";
 import { showNotification } from "./utils.js";
 
-// --- ETAT GLOBAL ---
-let currentService = null;
-window.selectedSlotIso = null;
-
-// --- 1. LOGIQUE UI AVIS (Etoiles interactives) ---
-function initStarRating() {
-  const container = document.getElementById("star-container");
-  const input = document.getElementById("rating-value");
-  if (!container || !input) return;
-
-  const stars = container.querySelectorAll("i");
-
-  stars.forEach((star) => {
-    star.addEventListener("click", () => {
-      const val = star.getAttribute("data-value");
-      input.value = val;
-      updateStars(val);
-    });
-  });
-
-  function updateStars(value) {
-    stars.forEach((s) => {
-      const v = s.getAttribute("data-value");
-      if (v <= value) {
-        s.classList.remove("fa-regular");
-        s.classList.add("fa-solid", "text-orange-400");
-      } else {
-        s.classList.remove("fa-solid", "text-orange-400");
-        s.classList.add("fa-regular");
-      }
-    });
-  }
-}
-
-// --- 2. LOGIQUE AFFICHAGE AVIS (Accueil) ---
-function generateStarsHtml(rating) {
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating % 1 >= 0.5;
-  let html = "";
-  for (let i = 0; i < fullStars; i++)
-    html += '<i class="fa-solid fa-star"></i>';
-  if (hasHalf) html += '<i class="fa-solid fa-star-half-stroke"></i>';
-  return html;
-}
-
+// --- 1. AVIS & CAROUSEL ---
 async function updateGlobalRating() {
   const headerEl = document.getElementById("global-rating");
-  const sectionEl = document.getElementById("section-rating-display");
-  if (!headerEl && !sectionEl) return;
-
+  if (!headerEl) return;
   const { data: reviews } = await supabase
     .from("reviews")
     .select("rating")
     .eq("approved", true);
-
-  if (!reviews || reviews.length === 0) {
-    if (headerEl)
-      headerEl.innerHTML = '<i class="fa-regular fa-star"></i> --/5 (0 avis)';
-    if (sectionEl)
-      sectionEl.innerHTML =
-        '<span class="text-slate-400">Pas encore d\'avis.</span>';
-    return;
-  }
-
-  const total = reviews.reduce((sum, r) => sum + r.rating, 0);
-  const average = (total / reviews.length).toFixed(1);
-
-  if (headerEl)
-    headerEl.innerHTML = `<i class="fa-solid fa-star"></i> ${average}/5 <span class="text-xs text-slate-400 ml-1">(${reviews.length})</span>`;
-
-  if (sectionEl) {
-    sectionEl.innerHTML = `
-        <div class="flex flex-col items-center gap-1">
-            <div class="text-2xl text-orange-400 flex gap-1 drop-shadow-sm">${generateStarsHtml(
-              average
-            )}</div>
-            <div class="text-slate-500 font-medium text-sm">Note : <span class="text-[#002050] font-bold">${average}/5</span> (${
-      reviews.length
-    } avis)</div>
-        </div>`;
-  }
+  if (!reviews || reviews.length === 0) return;
+  const average = (
+    reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+  ).toFixed(1);
+  headerEl.innerHTML = `<i class="fa-solid fa-star"></i> ${average}/5 (${reviews.length})`;
 }
 
 export async function loadReviewsCarousel() {
@@ -94,326 +25,204 @@ export async function loadReviewsCarousel() {
     .eq("approved", true)
     .order("created_at", { ascending: false })
     .limit(10);
-  if (!reviews || reviews.length === 0) return;
-
+  if (!reviews) return;
   wrapper.innerHTML = reviews
     .map(
       (r) => `
     <div class="w-[300px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0 mx-2 snap-center">
         <div class="flex items-center gap-4 mb-4">
-            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">${r.customer_name.charAt(
-              0
-            )}</div>
-            <div><div class="font-bold text-[#002050]">${
-              r.customer_name
-            }</div><div class="text-xs text-slate-400">${
-        r.car_model || "Client"
-      }</div></div>
-            <div class="ml-auto text-orange-400 text-xs"><i class="fa-solid fa-star"></i> ${
-              r.rating
-            }/5</div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">${r.customer_name.charAt(0)}</div>
+            <div><div class="font-bold text-[#002050]">${r.customer_name}</div><div class="text-xs text-slate-400">${r.car_model || "Client"}</div></div>
+            <div class="ml-auto text-orange-400 text-xs"><i class="fa-solid fa-star"></i> ${r.rating}/5</div>
         </div>
         <p class="text-slate-500 text-sm line-clamp-4">"${r.comment}"</p>
-    </div>`
+    </div>`,
     )
     .join("");
 }
 
-// --- 3. ENVOI D'AVIS (Page Avis) ---
-export async function handlePostReview(e) {
-  e.preventDefault();
-  const btn = document.getElementById("btn-submit-review");
-  const originalText = btn.innerHTML;
+// --- 2. CATALOGUE & LOGIQUE DE SÉLECTION ---
+let selectedPiece = null;
+let currentMatchingRows = []; // Stocke toutes les lignes correspondant au modèle choisi
 
-  // Récupération des valeurs
-  const ratingValue = document.getElementById("rating-value").value;
-  const fullName = document.getElementById("review-name").value.trim(); // Trim enlève les espaces inutiles avant/après
-  const car = document.getElementById("review-car").value.trim();
-  const comment = document.getElementById("review-comment").value.trim();
-
-  // Validation basique
-  if (!ratingValue) {
-    showNotification("Veuillez sélectionner une note.", "error");
-    return;
-  }
-  if (!fullName) {
-    showNotification("Le nom est obligatoire.", "error");
-    return;
-  }
-
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Vérification...';
-  btn.disabled = true;
-
-  try {
-    // 1. Vérification sécurisée (RPC)
-    const { data: canPost, error: rpcError } = await supabase.rpc(
-      "check_can_review",
-      { client_name: fullName }
-    );
-    if (rpcError) throw rpcError;
-
-    if (!canPost) {
-      // --- C'EST ICI QUE ÇA CHANGE ---
-      // Au lieu de alert(), on affiche la modale personnalisée
-      document.getElementById("error-modal").classList.remove("hidden");
-
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      return;
-    }
-
-    // 2. Insertion si tout est OK
-    const { error } = await supabase.from("reviews").insert([
-      {
-        customer_name: fullName,
-        car_model: car,
-        rating: parseInt(ratingValue),
-        comment: comment,
-        approved: false,
-      },
-    ]);
-
-    if (error) throw error;
-
-    // 3. Succès
-    document.getElementById("review-form").classList.add("hidden");
-    document.getElementById("review-success").classList.remove("hidden");
-    showNotification("Avis envoyé avec succès !", "success");
-  } catch (err) {
-    console.error(err);
-    showNotification("Erreur technique : " + err.message, "error");
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-  }
-}
-
-// --- 4. RÉSERVATION (Standard) ---
-export async function initBookingPage() {
-  const container = document.getElementById("service-selector-container");
-  if (!container) return;
-
-  const dp = document.getElementById("date-picker");
-  if (dp) dp.min = new Date().toISOString().split("T")[0];
-
-  container.innerHTML =
-    '<div class="text-center py-4 text-blue-300"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</div>';
-
-  const { data: services } = await supabase
-    .from("services")
-    .select("*")
-    .order("price");
-
-  if (!services || services.length === 0) {
-    container.innerHTML =
-      "<p class='text-center text-red-400 bg-red-50 p-2 rounded'>Aucun service disponible.</p>";
-    return;
-  }
-
-  container.innerHTML = services
-    .map(
-      (s) => `
-        <div data-id="${s.id}" class="service-card border border-white/20 bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition mb-2 flex justify-between items-center group">
-             <div><div class="font-bold text-white text-lg">${s.name}</div><div class="text-xs text-blue-300 font-medium">${s.duration} min</div></div>
-             <div class="font-bold text-[#5475FF] bg-blue-50 px-3 py-1 rounded-lg shadow-sm">${s.price}€</div>
-        </div>`
-    )
-    .join("");
-
-  container.querySelectorAll(".service-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const s = services.find((srv) => srv.id == card.dataset.id);
-      selectService(s, card);
-    });
-  });
-}
-
-function selectService(service, element) {
-  document
-    .querySelectorAll(".service-card")
-    .forEach((el) =>
-      el.classList.remove("ring-2", "ring-[#5475FF]", "bg-white", "shadow-lg")
-    );
-  element.classList.add("ring-2", "ring-[#5475FF]", "bg-white", "shadow-lg");
-  currentService = service;
-  document.getElementById("summary-service").innerText = service.name;
-  document.getElementById("total-price-display").innerText =
-    service.price + "€";
-  document.getElementById("final-service-id").value = service.id;
-  document.getElementById("final-price").value = service.price;
-  document
-    .getElementById("date-step")
-    .classList.remove("opacity-50", "pointer-events-none");
-  const datePicker = document.getElementById("date-picker");
-  if (datePicker.value) handleDateChange(datePicker.value);
-}
-
-window.onDateChanged = () => {
-  const val = document.getElementById("date-picker").value;
-  handleDateChange(val);
+window.handlePlateLookup = function () {
+  showNotification(
+    "Recherche par plaque bientôt disponible. Remplissage manuel.",
+    "info",
+  );
 };
 
-async function handleDateChange(dateInput) {
-  if (!dateInput || !currentService) return;
-  const container = document.getElementById("slots-container");
-  const loader = document.getElementById("slots-loader");
-  if (loader) loader.classList.remove("hidden");
-  container.innerHTML = "";
-  document
-    .getElementById("slots-step")
-    .classList.remove("opacity-50", "pointer-events-none");
+export async function initCatalog() {
+  const brandSel = document.getElementById("select-brand");
+  if (!brandSel) return;
 
-  const startDay = new Date(dateInput);
-  startDay.setHours(0, 0, 0, 0);
-  const endDay = new Date(dateInput);
-  endDay.setHours(23, 59, 59, 999);
-
-  const { data: rawSlots } = await supabase
-    .from("slots")
+  const { data: catalog, error } = await supabase
+    .from("vehicles_catalog")
     .select("*")
-    .gte("end_time", startDay.toISOString())
-    .lte("start_time", endDay.toISOString());
-  const { data: busyBookings } = await supabase
-    .from("bookings")
-    .select("*")
-    .gte("end_time", startDay.toISOString())
-    .lte("start_time", endDay.toISOString());
-  if (loader) loader.classList.add("hidden");
+    .order("brand");
 
-  if (!rawSlots || rawSlots.length === 0) {
-    container.innerHTML =
-      '<div class="col-span-3 text-center text-slate-400 py-2">Aucune disponibilité ce jour.</div>';
+  if (error || !catalog) {
+    brandSel.innerHTML =
+      '<option disabled class="text-slate-800 bg-white">Erreur de catalogue</option>';
     return;
   }
-  let availableTimes = [];
-  const step = 30;
-  const duration = parseInt(currentService.duration) || 60;
-  rawSlots.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-  rawSlots.forEach((slot) => {
-    let cursor = new Date(slot.start_time);
-    let limit = new Date(slot.end_time);
-    while (cursor.getTime() + duration * 60000 <= limit.getTime()) {
-      const startAttempt = new Date(cursor);
-      const endAttempt = new Date(cursor.getTime() + duration * 60000);
-      const isBusy = busyBookings.some((b) => {
-        const bS = new Date(b.start_time);
-        const bE = new Date(b.end_time);
-        return startAttempt < bE && endAttempt > bS;
-      });
-      if (!isBusy) {
-        const label = cursor.toLocaleTimeString("fr-FR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        if (!availableTimes.some((t) => t.label === label))
-          availableTimes.push({ label, iso: startAttempt.toISOString() });
-      }
-      cursor.setMinutes(cursor.getMinutes() + step);
-    }
-  });
-
-  if (availableTimes.length === 0)
-    container.innerHTML =
-      '<div class="col-span-3 text-center text-orange-400 py-2">Complet ce jour.</div>';
-  else {
-    availableTimes.sort((a, b) => a.label.localeCompare(b.label));
-    container.innerHTML = availableTimes
+  // Remplir les Marques
+  const brands = [...new Set(catalog.map((i) => i.brand))];
+  brandSel.innerHTML =
+    '<option value="" disabled selected class="text-slate-800 bg-white">Choisir une marque...</option>' +
+    brands
       .map(
-        (t) =>
-          `<div class="time-slot" onclick="selectTime('${t.label}', '${t.iso}', this)">${t.label}</div>`
+        (b) =>
+          `<option value="${b}" class="text-slate-800 bg-white">${b}</option>`,
       )
       .join("");
-  }
-  const [y, m, d] = dateInput.split("-");
-  document.getElementById("summary-date").innerText = new Date(
-    y,
-    m - 1,
-    d
-  ).toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
+
+  // Événement : Changement de Marque
+  brandSel.addEventListener("change", (e) => {
+    const models = [
+      ...new Set(
+        catalog.filter((i) => i.brand === e.target.value).map((i) => i.model),
+      ),
+    ];
+    const modelSel = document.getElementById("select-model");
+    modelSel.innerHTML =
+      '<option value="" disabled selected class="text-slate-800 bg-white">Choisir un modèle...</option>' +
+      models
+        .map(
+          (m) =>
+            `<option value="${m}" class="text-slate-800 bg-white">${m}</option>`,
+        )
+        .join("");
+    modelSel.disabled = false;
+    document.getElementById("select-year").disabled = true;
+    document.getElementById("catalog-result").classList.add("hidden");
+  });
+
+  // Événement : Changement de Modèle (Correction ici pour gérer plusieurs lignes)
+  document.getElementById("select-model").addEventListener("change", (e) => {
+    const selectedBrand = brandSel.value;
+    const selectedModel = e.target.value;
+    const yearSel = document.getElementById("select-year");
+
+    // On récupère TOUTES les lignes qui correspondent à ce modèle (Phase 1, Phase 2, etc.)
+    currentMatchingRows = catalog.filter(
+      (i) => i.brand === selectedBrand && i.model === selectedModel,
+    );
+
+    let allYears = new Set();
+    // On boucle sur chaque ligne trouvée pour extraire toutes les années possibles
+    currentMatchingRows.forEach((row) => {
+      for (let y = row.year_start; y <= row.year_end; y++) {
+        allYears.add(y);
+      }
+    });
+
+    // On trie les années par ordre croissant
+    const sortedYears = Array.from(allYears).sort((a, b) => a - b);
+
+    let opts =
+      '<option value="" disabled selected class="text-slate-800 bg-white">Année...</option>';
+    sortedYears.forEach((y) => {
+      opts += `<option value="${y}" class="text-slate-800 bg-white">${y}</option>`;
+    });
+
+    yearSel.innerHTML = opts;
+    yearSel.disabled = false;
+    document.getElementById("catalog-result").classList.add("hidden");
+    document.getElementById("pay-btn").disabled = true;
+  });
+
+  // Événement : Changement d'Année
+  document.getElementById("select-year").addEventListener("change", (e) => {
+    const yearChosen = parseInt(e.target.value);
+
+    // On cherche dans nos lignes celle qui couvre l'année sélectionnée
+    selectedPiece = currentMatchingRows.find(
+      (row) => yearChosen >= row.year_start && yearChosen <= row.year_end,
+    );
+
+    if (selectedPiece) {
+      document.getElementById("result-part-name").innerText =
+        selectedPiece.part_name;
+      document.getElementById("result-price").innerText =
+        selectedPiece.price + "€";
+      document.getElementById("catalog-result").classList.remove("hidden");
+
+      // Remplissage des champs cachés pour la commande
+      document.getElementById("final-part-name").value =
+        selectedPiece.part_name;
+      document.getElementById("final-price").value = selectedPiece.price;
+      document.getElementById("final-vehicle").value =
+        `${selectedPiece.brand} ${selectedPiece.model} (${yearChosen})`;
+
+      document.getElementById("pay-btn").disabled = false;
+    }
   });
 }
 
-window.selectTime = function (timeStr, isoStart, element) {
-  document
-    .querySelectorAll(".time-slot")
-    .forEach((el) => el.classList.remove("selected"));
-  element.classList.add("selected");
-  document.getElementById("final-time").value = timeStr;
-  document.getElementById("summary-time").innerText = " à " + timeStr;
-  window.selectedSlotIso = isoStart;
-  const btn = document.getElementById("pay-btn");
-  btn.disabled = false;
-  btn.classList.remove("opacity-50", "cursor-not-allowed");
-};
-
+// --- 3. PAIEMENT & ENREGISTREMENT ---
 export async function handlePayment(e) {
   e.preventDefault();
   const btn = document.getElementById("pay-btn");
-  const originalText = btn.innerHTML;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Traitement...';
   btn.disabled = true;
 
-  if (!window.selectedSlotIso || !currentService) {
-    alert("Erreur: Veuillez sélectionner un créneau.");
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-    return;
-  }
-  const start = new Date(window.selectedSlotIso);
-  const end = new Date(start.getTime() + currentService.duration * 60000);
-  const make = document.getElementById("car-make").value;
-  const model = document.getElementById("car-model").value;
-  const year = document.getElementById("car-year").value;
-  const fullCarModel = `${make} ${model} (${year})`;
-
-  const bookingData = {
-    customer_name: (
+  const data = {
+    customer_name:
       document.getElementById("prenom").value +
       " " +
-      document.getElementById("nom").value
-    ).trim(),
+      document.getElementById("nom").value,
     email: document.getElementById("email").value,
     phone: document.getElementById("tel").value,
-    car_model: fullCarModel,
+    car_model: document.getElementById("final-vehicle").value,
     address: document.getElementById("address").value,
-    service_name: currentService.name,
-    price: currentService.price,
-    start_time: start.toISOString(),
-    end_time: end.toISOString(),
+    service_name: document.getElementById("final-part-name").value,
+    price: document.getElementById("final-price").value,
     status: "pending",
   };
 
-  const { error } = await supabase.from("bookings").insert([bookingData]);
+  const { error } = await supabase.from("bookings").insert([data]);
 
   if (!error) {
-    showNotification("Rendez-vous envoyé !", "success");
-    setTimeout(() => (window.location.href = "index.html"), 2000);
+    document.getElementById("booking-page").innerHTML = `
+            <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl text-center max-w-2xl mx-auto w-full my-12">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6"><i class="fa-solid fa-check"></i></div>
+                <h2 class="text-3xl font-extrabold text-[#002050] mb-4">Commande confirmée !</h2>
+                <p class="text-slate-500 mb-8">Votre commande de pièce a été enregistrée.</p>
+                <div class="bg-blue-50 p-6 rounded-2xl mb-8 text-left border border-blue-100">
+                    <p class="font-bold text-[#002050]">Étape suivante :</p>
+                    <p class="text-slate-600 mt-2">Appelez-nous au <a href="tel:0783728977" class="text-[#5475FF] font-bold underline">07 83 72 89 77</a> pour fixer le RDV d'installation.</p>
+                </div>
+                <a href="index.html" class="bg-slate-100 text-[#002050] px-8 py-4 rounded-xl font-bold">Retour</a>
+            </div>`;
   } else {
-    alert("Erreur: " + error.message);
-    btn.innerHTML = originalText;
+    showNotification("Erreur lors de la commande.", "error");
+    btn.innerHTML = "Payer ma pièce";
     btn.disabled = false;
   }
 }
 
-// --- INITIALISATION ---
+// --- 4. DEMANDE SUR MESURE ---
+window.handleCustomRequest = async function (e) {
+  e.preventDefault();
+  const data = {
+    customer_name: document.getElementById("custom-name").value,
+    phone: document.getElementById("custom-phone").value,
+    car_model: `${document.getElementById("custom-brand").value} ${document.getElementById("custom-model").value} (${document.getElementById("custom-year").value})`,
+    service_name: "DEMANDE SUR MESURE (Devis)",
+    price: 0,
+    status: "pending",
+  };
+  const { error } = await supabase.from("bookings").insert([data]);
+  if (!error) {
+    document.getElementById("custom-request-modal").classList.add("hidden");
+    showNotification("Demande envoyée !", "success");
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   loadReviewsCarousel();
   updateGlobalRating();
-
-  // Page Booking
-  if (document.getElementById("booking-page")) {
-    initBookingPage();
-    const bookingForm = document.getElementById("booking-form");
-    if (bookingForm) bookingForm.addEventListener("submit", handlePayment);
-  }
-
-  // Page Avis
-  const reviewForm = document.getElementById("review-form");
-  if (reviewForm) {
-    initStarRating(); // <-- Active les étoiles cliquables
-    reviewForm.addEventListener("submit", handlePostReview);
-  }
+  if (document.getElementById("booking-page")) initCatalog();
 });
