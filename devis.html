@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fixt. - Demander un devis gratuit</title>
+    <link rel="icon" type="image/png" href="img/favicon.png" />
+    <link rel="apple-touch-icon" href="img/favicon.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body
+    class="flex flex-col min-h-screen bg-[#F8FAFC] font-sans text-slate-800"
+  >
+    <nav
+      class="w-full py-6 px-8 flex justify-between items-center max-w-6xl mx-auto"
+    >
+      <a href="index.html"
+        ><img
+          src="img/logo.png"
+          alt="Fixt Logo"
+          class="h-20 w-auto object-contain"
+      /></a>
+      <a
+        href="index.html"
+        class="text-slate-500 font-bold text-sm hover:text-slate-800 transition"
+        >Retour</a
+      >
+    </nav>
+
+    <main
+      id="devis-page"
+      class="flex-grow flex items-center justify-center p-4 lg:p-8 mb-12 mt-16 md:mt-0"
+    >
+      <div
+        class="max-w-6xl w-full bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[700px] border border-slate-100"
+      >
+        <div
+          class="lg:w-2/5 bg-[#002050] p-6 md:p-12 text-white flex flex-col relative overflow-hidden"
+        >
+          <h1 class="text-2xl md:text-3xl font-extrabold mb-6 md:mb-8">
+            Demande de devis<br /><span class="text-[#5475FF]">gratuit.</span>
+          </h1>
+
+          <!-- Section Recherche par Plaque (Préparée pour API) -->
+          <div class="mb-8 p-5 bg-white/10 rounded-2xl border border-white/20">
+            <label class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+              >Recherche automatique</label
+            >
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="plate-lookup-input"
+                placeholder="AA-123-BB"
+                class="flex-1 bg-white border border-white/20 rounded-xl p-3 text-[#002050] font-bold uppercase outline-none focus:ring-2 focus:ring-[#5475FF] placeholder-slate-400"
+              />
+              <button
+                id="btn-plate-lookup"
+                onclick="handlePlateLookup()"
+                class="bg-[#5475FF] hover:bg-blue-600 px-5 rounded-xl transition-all text-white flex items-center justify-center min-w-[60px]"
+              >
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </div>
+            <p
+              class="text-[11px] text-blue-200 mt-2 italic text-center opacity-80"
+            >
+              Remplissage automatique via immatriculation
+            </p>
+          </div>
+
+          <div class="flex items-center gap-4 mb-6 opacity-40">
+            <div class="flex-1 h-px bg-white"></div>
+            <div class="text-xs font-bold uppercase text-center">
+              Ou manuellement
+            </div>
+            <div class="flex-1 h-px bg-white"></div>
+          </div>
+
+          <div class="mb-6 space-y-4">
+            <div>
+              <label
+                class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+                >Marque *</label
+              >
+              <input
+                type="text"
+                id="input-brand"
+                placeholder="ex: BMW, Mercedes, Peugeot..."
+                required
+                class="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] placeholder-blue-200/50"
+              />
+            </div>
+
+            <div>
+              <label
+                class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+                >Modèle *</label
+              >
+              <input
+                type="text"
+                id="input-model"
+                placeholder="ex: Serie 1, Classe A, 208..."
+                required
+                class="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] placeholder-blue-200/50"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+                  >Année *</label
+                >
+                <input
+                  type="number"
+                  id="input-year"
+                  placeholder="ex: 2018"
+                  min="1990"
+                  max="2026"
+                  required
+                  class="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] placeholder-blue-200/50"
+                />
+              </div>
+              <div>
+                <label
+                  class="text-xs font-bold uppercase text-blue-300 mb-2 block"
+                  >Plaque (Optionnel)</label
+                >
+                <input
+                  type="text"
+                  id="input-plate"
+                  placeholder="AA-123-BB"
+                  class="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white outline-none focus:border-[#5475FF] placeholder-blue-200/50 uppercase transition-all duration-300"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-auto pt-6 border-t border-white/10 text-center">
+            <p class="text-sm text-blue-200 mb-3">
+              <i class="fa-solid fa-circle-info mr-1"></i> Devis gratuit et sans
+              engagement
+            </p>
+          </div>
+        </div>
+
+        <div class="lg:w-3/5 p-6 md:p-14 bg-white flex flex-col justify-center">
+          <h2 class="text-2xl md:text-3xl font-extrabold text-[#002050] mb-2">
+            Vos coordonnées
+          </h2>
+          <p class="text-slate-500 mb-8">
+            Remplissez le formulaire ci-dessous pour recevoir votre devis
+            personnalisé.
+          </p>
+
+          <form
+            id="devis-form"
+            onsubmit="handleDevisSubmit(event)"
+            class="space-y-5"
+          >
+            <div class="space-y-3">
+              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
+                >Informations personnelles</label
+              >
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  id="prenom"
+                  placeholder="Prénom *"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+                <input
+                  type="text"
+                  id="nom"
+                  placeholder="Nom *"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Email *"
+                  required
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+                <input
+                  type="tel"
+                  id="tel"
+                  placeholder="Téléphone * (06 ou 07)"
+                  required
+                  pattern="^(?:(?:\+|00)33|0)[1-9](?:[0-9]{8})$"
+                  class="bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
+                >Adresse d'intervention</label
+              >
+              <input
+                type="text"
+                id="address"
+                placeholder="Adresse complète (Rue, Ville, Code Postal) *"
+                required
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+              />
+            </div>
+
+            <div class="space-y-3">
+              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
+                >Services souhaités *</label
+              >
+              <div
+                class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3"
+              >
+                <label
+                  class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition"
+                >
+                  <input
+                    type="checkbox"
+                    name="service"
+                    value="carplay"
+                    class="w-5 h-5 text-[#5475FF] rounded focus:ring-[#5475FF]"
+                  />
+                  <div class="flex-1">
+                    <div class="font-bold text-[#002050]">
+                      CarPlay / Android Auto
+                    </div>
+                    <div class="text-xs text-slate-500">
+                      Installation module sans fil
+                    </div>
+                  </div>
+                </label>
+
+                <label
+                  class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition"
+                >
+                  <input
+                    type="checkbox"
+                    name="service"
+                    value="camera"
+                    class="w-5 h-5 text-[#5475FF] rounded focus:ring-[#5475FF]"
+                  />
+                  <div class="flex-1">
+                    <div class="font-bold text-[#002050]">Caméra de recul</div>
+                    <div class="text-xs text-slate-500">
+                      Avec guidage dynamique
+                    </div>
+                  </div>
+                </label>
+
+                <label
+                  class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition"
+                >
+                  <input
+                    type="checkbox"
+                    name="service"
+                    value="coding"
+                    class="w-5 h-5 text-[#5475FF] rounded focus:ring-[#5475FF]"
+                  />
+                  <div class="flex-1">
+                    <div class="font-bold text-[#002050]">
+                      Coding / Diagnostic
+                    </div>
+                    <div class="text-xs text-slate-500">
+                      Déblocage options cachées
+                    </div>
+                  </div>
+                </label>
+
+                <label
+                  class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition"
+                >
+                  <input
+                    type="checkbox"
+                    name="service"
+                    value="autre"
+                    id="service-autre"
+                    class="w-5 h-5 text-[#5475FF] rounded focus:ring-[#5475FF]"
+                  />
+                  <div class="flex-1">
+                    <div class="font-bold text-[#002050]">
+                      Autre (préciser ci-dessous)
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <label class="text-xs font-bold uppercase text-slate-400 ml-1"
+                >Message / Détails complémentaires</label
+              >
+              <textarea
+                id="message"
+                rows="4"
+                placeholder="Décrivez votre besoin, vos questions..."
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:border-[#5475FF]"
+              ></textarea>
+            </div>
+
+            <div
+              class="bg-blue-50 border border-blue-100 p-4 rounded-xl text-sm text-[#002050] mt-6"
+            >
+              <p class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-[#5475FF]"></i>
+                <strong>Devis 100% gratuit et sans engagement</strong>
+              </p>
+              <p class="mt-2 text-slate-600">
+                Nous vous recontacterons sous 24h pour établir un devis
+                personnalisé.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              id="submit-btn"
+              class="w-full bg-[#002050] hover:bg-[#5475FF] text-white py-5 rounded-2xl font-bold text-lg shadow-lg transition-all mt-4"
+            >
+              Demander un devis gratuit
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"
+    ></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="js/app-client.js"></script>
+  </body>
+</html>

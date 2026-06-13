@@ -135,7 +135,7 @@
             <img
               src="img/logo.png"
               alt="Fixt Logo"
-              class="h-32 w-auto object-contain drop-shadow-md"
+              class="h-20 w-auto object-contain drop-shadow-md"
             />
           </a>
         </div>
@@ -157,14 +157,79 @@
             >À propos</a
           >
           <a
-            href="booking.html"
-            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm"
+            href="devis.html"
+            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm hidden md:block"
           >
-            Prendre RDV
+            Demander un devis
           </a>
+
+          <!-- Bouton Menu Mobile -->
+          <button
+            id="mobile-menu-btn"
+            class="md:hidden text-slate-600 text-2xl focus:outline-none"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
         </div>
       </div>
     </nav>
+
+    <!-- Menu Mobile Overlay -->
+    <div
+      id="mobile-menu"
+      class="fixed inset-0 bg-white z-[100] transform translate-x-full transition-transform duration-300 flex flex-col"
+    >
+      <div
+        class="p-6 flex justify-between items-center border-b border-slate-100"
+      >
+        <img
+          src="img/logo.png"
+          alt="Fixt Logo"
+          class="h-12 w-auto object-contain"
+        />
+        <button
+          id="mobile-menu-close"
+          class="text-slate-600 text-3xl focus:outline-none"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="flex flex-col p-8 gap-6 text-xl font-bold text-[#002050]">
+        <a
+          href="index.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Accueil</a
+        >
+        <a
+          href="index.html#services"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Services</a
+        >
+        <a
+          href="realisations.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Réalisations</a
+        >
+        <a
+          href="about.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >À propos</a
+        >
+        <a
+          href="avis.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Avis clients</a
+        >
+        <div class="mt-8 pt-8 border-t border-slate-100">
+          <a
+            href="devis.html"
+            class="mobile-link btn-primary block text-center py-4 rounded-2xl shadow-lg shadow-blue-200"
+          >
+            Demander un devis gratuit
+          </a>
+        </div>
+      </div>
+    </div>
 
     <main>
       <header
@@ -180,7 +245,7 @@
             DISPONIBLE SUR DOUAI & ENVIRONS
           </div>
           <h1
-            class="text-6xl md:text-7xl font-extrabold leading-tight tracking-tight text-[#002050]"
+            class="text-4xl md:text-7xl font-extrabold leading-tight tracking-tight text-[#002050]"
           >
             Votre voiture,<br />
             <span
@@ -195,10 +260,10 @@
           </p>
           <div class="flex flex-col sm:flex-row gap-4 pt-4">
             <a
-              href="booking.html"
+              href="devis.html"
               class="btn-primary px-8 py-4 rounded-2xl font-bold text-lg text-center shadow-xl shadow-blue-100 hover:shadow-2xl transition-all"
             >
-              Commander ma pièce
+              Demander un devis
             </a>
             <a
               href="#services"
@@ -439,7 +504,7 @@
 
         <div class="max-w-7xl mx-auto px-8 relative z-10">
           <div class="text-center mb-16 max-w-2xl mx-auto">
-            <h2 class="text-4xl font-extrabold text-[#002050] mb-4">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-[#002050] mb-4">
               Nos solutions expertes
             </h2>
             <p class="text-slate-500 text-lg">
@@ -474,10 +539,10 @@
                   <span class="text-2xl font-bold text-[#002050]">200€</span>
                 </div>
                 <a
-                  href="booking.html"
+                  href="devis.html"
                   class="text-[#5475FF] font-bold hover:underline"
                 >
-                  Réserver <i class="fa-solid fa-arrow-right ml-1"></i>
+                  Demander un devis <i class="fa-solid fa-arrow-right ml-1"></i>
                 </a>
               </div>
             </div>
@@ -507,10 +572,10 @@
                   <span class="text-2xl font-bold text-[#002050]">150€</span>
                 </div>
                 <a
-                  href="booking.html"
+                  href="devis.html"
                   class="text-[#5475FF] font-bold hover:underline"
                 >
-                  Réserver <i class="fa-solid fa-arrow-right ml-1"></i>
+                  Demander un devis <i class="fa-solid fa-arrow-right ml-1"></i>
                 </a>
               </div>
             </div>
@@ -540,10 +605,10 @@
                   <span class="text-2xl font-bold text-[#002050]">30€</span>
                 </div>
                 <a
-                  href="booking.html"
+                  href="devis.html"
                   class="text-[#5475FF] font-bold hover:underline"
                 >
-                  Réserver <i class="fa-solid fa-arrow-right ml-1"></i>
+                  Demander un devis <i class="fa-solid fa-arrow-right ml-1"></i>
                 </a>
               </div>
             </div>
@@ -575,7 +640,7 @@
                 >Ne perdez plus de temps</span
               >
               <h2
-                class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight"
+                class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight"
               >
                 Prêt à moderniser votre conduite ?
               </h2>
@@ -602,10 +667,10 @@
 
             <div class="md:w-1/3 flex justify-center md:justify-end">
               <a
-                href="booking.html"
+                href="devis.html"
                 class="group relative inline-flex items-center justify-center px-8 py-5 text-lg font-bold text-[#002050] bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]"
               >
-                <span class="mr-2">Commander ma pièce</span>
+                <span class="mr-2">Demander un devis</span>
                 <i
                   class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"
                 ></i>
@@ -701,8 +766,8 @@
                 >
               </li>
               <li>
-                <a href="booking.html" class="hover:text-[#5475FF] transition"
-                  >Prendre Rendez-vous</a
+                <a href="devis.html" class="hover:text-[#5475FF] transition"
+                  >Demander un devis</a
                 >
               </li>
             </ul>
@@ -771,30 +836,58 @@
             <h2 class="text-2xl font-bold mb-4 text-[#002050]">Mentions Légales</h2>
             <p class="mb-2"><strong>Éditeur du site :</strong> Fixt Nord</p>
             <p class="mb-2"><strong>Adresse :</strong> 23 rue Léon Gambetta, 59500 Douai</p>
-            <p class="mb-2"><strong>Contact :</strong> contact@fixnord.fr | 07 83 72 89 77</p>
+            <p class="mb-2"><strong>Contact :</strong> contact@fixtnord.fr | 07 83 72 89 77</p>
             <p class="mb-4"><strong>Hébergeur :</strong> Le site est hébergé par un prestataire tiers.</p>
             <p class="text-sm text-slate-500">Conformément aux dispositions des articles 6-III et 19 de la Loi n° 2004-575 du 21 juin 2004 pour la Confiance dans l'économie numérique.</p>
         `,
         cgv: `
-            <h2 class="text-2xl font-bold mb-4 text-[#002050]">Conditions Générales de Vente (CGV)</h2>
-            <h3 class="font-bold mt-4">1. Objet</h3>
-            <p class="mb-2">Les présentes CGV régissent les ventes de prestations de services (installation CarPlay, diagnostic, codage) effectuées par Fixt Nord.</p>
-            <h3 class="font-bold mt-4">2. Prix et Paiement</h3>
-            <p class="mb-2">Les prix sont indiqués en euros. Le paiement est exigible immédiatement à la commande ou à la fin de la prestation selon accord.</p>
-            <h3 class="font-bold mt-4">3. Prestations</h3>
-            <p class="mb-2">Fixt Nord s'engage à fournir les services avec diligence et selon les règles de l'art. Toutefois, s'agissant de modifications électroniques, le client reconnaît avoir été informé des spécificités liées à son véhicule.</p>
-            <h3 class="font-bold mt-4">4. Garantie</h3>
-            <p class="mb-2">Nos installations matérielles sont garanties 30 jours pièces et main d'œuvre, hors casse ou mauvaise manipulation.</p>
+            <h2 class="text-2xl font-bold mb-4 text-[#002050]">Conditions Générales de Vente et de Services (CGV)</h2>
+            <p class="mb-4 text-sm text-slate-600">Applicables aux prestations de Fixt Nord</p>
+
+            <h3 class="font-bold mt-4 text-lg">1. Objet et nature des prestations</h3>
+            <p class="mb-2">Les présentes CGV régissent les ventes de matériel et les prestations de services (installation d'accessoires électroniques type CarPlay, diagnostic, codage) effectuées par Fixt Nord. L'entreprise intervient exclusivement sur l'installation d'équipements électroniques de seconde monte et ne réalise aucune prestation de mécanique générale. En validant sa commande en ligne et en signant l'Ordre de Réparation le jour de l'intervention, le client accepte sans réserve les présentes CGV.</p>
+
+            <h3 class="font-bold mt-4 text-lg">2. Commande, Prix et Paiement</h3>
+            <p class="mb-2">Les prix sont indiqués en euros (TVA non applicable, art. 293 B du CGI). La facturation se divise en deux temps :</p>
+            <ul class="list-disc pl-5 mb-2">
+                <li><strong>Achat du matériel :</strong> Le client règle intégralement le prix de la pièce via le site web, condition préalable à la commande.</li>
+                <li><strong>Prestation d'installation :</strong> Le paiement de la main-d'œuvre et des éventuels frais de déplacement est exigible immédiatement à la fin de l'intervention.</li>
+                <li><strong>Responsabilité des informations :</strong> Le client est seul responsable de l'exactitude des informations fournies (modèle, année, photos, code moteur). En cas d'incompatibilité matérielle due à une erreur du client, aucun remboursement de la pièce commandée ne pourra être exigé si le fournisseur de Fixt Nord refuse le retour.</li>
+            </ul>
+
+            <h3 class="font-bold mt-4 text-lg">3. Annulation, Retard et Acompte</h3>
+            <p class="mb-2">Toute annulation de rendez-vous doit être signifiée par écrit au moins 24 heures à l'avance. En cas d'absence du client, d'annulation hors délai ou d'impossibilité d'effectuer l'installation du fait du client, Fixt Nord conservera l'acompte de réservation (ou facturera un forfait de déplacement) à titre de dédommagement pour le créneau horaire bloqué.</p>
+
+            <h3 class="font-bold mt-4 text-lg">4. Droit de Rétractation</h3>
+            <p class="mb-2">Conformément à l'article L221-18 du Code de la consommation, le client dispose d'un délai de 14 jours pour exercer son droit de rétractation sur l'achat du matériel. Toutefois, conformément à l'article L221-28, ce droit ne peut être exercé pour les services d'installation si ceux-ci ont été pleinement exécutés avant la fin du délai avec l'accord préalable exprès du client.</p>
+
+            <h3 class="font-bold mt-4 text-lg">5. Limites de Responsabilité</h3>
+            <p class="mb-2">Avant toute intervention technique, un état des lieux contradictoire du véhicule sera réalisé et consigné sur un Ordre de Réparation signé. La responsabilité de Fixt Nord ne saurait être engagée pour tout dysfonctionnement, usure, ou panne électrique/électronique préexistant à l'intervention, ou pour les dommages consécutifs à des modifications antérieures du faisceau électrique non signalées par le client.</p>
+
+            <h3 class="font-bold mt-4 text-lg">6. Garantie Commerciale 30 Jours</h3>
+            <p class="mb-2">En complément des garanties légales, Fixt Nord propose une garantie commerciale "Satisfait ou remboursé" de 30 jours calendaires.</p>
+            <ul class="list-disc pl-5 mb-2">
+                <li><strong>Périmètre :</strong> <strong>Seul le prix d'achat du matériel sera remboursé</strong>. La main-d'œuvre liée à l'installation initiale a été consommée et est définitivement acquise à Fixt Nord.</li>
+                <li><strong>Conditions de démontage :</strong> Dans ce délai de 30 jours, Fixt Nord procédera au retrait gratuit du matériel. Si le client ne fournit pas l'autoradio ou les plastiques d'origine, l'emplacement sera laissé vide. Aucune réclamation ou demande d'indemnité ne sera recevable.</li>
+                <li><strong>Exclusions :</strong> Casse, choc, rayure, mauvaise manipulation, exposition à un liquide, démontage par le client, "flashing" non autorisé.</li>
+                <li><strong>Hors délai :</strong> Passé 30 jours, tout déplacement, diagnostic ou retrait sera facturé au tarif en vigueur.</li>
+            </ul>
+
+            <h3 class="font-bold mt-4 text-lg">7. Garanties Légales et Médiation</h3>
+            <p class="mb-2">Le matériel vendu bénéficie de la garantie légale de conformité et de la garantie contre les vices cachés. Conformément à l'article L. 612-1 du Code de la consommation, le client peut recourir gratuitement à un service de médiation en cas de litige. En cas de litige non résolu, les tribunaux compétents seront ceux du ressort de Douai.</p>
         `,
         privacy: `
             <h2 class="text-2xl font-bold mb-4 text-[#002050]">Politique de Confidentialité</h2>
-            <p class="mb-2">Fixt Nord accorde une grande importance à la protection de votre vie privée.</p>
-            <h3 class="font-bold mt-4">Données collectées</h3>
-            <p class="mb-2">Nous collectons les informations suivantes lors de votre réservation : Nom, Prénom, Adresse email, Numéro de téléphone, Modèle de véhicule. Ces données sont nécessaires à la bonne exécution de nos services.</p>
-            <h3 class="font-bold mt-4">Utilisation des données</h3>
-            <p class="mb-2">Vos données ne sont utilisées que pour gérer vos rendez-vous et vous contacter en cas de besoin. Elles ne sont jamais vendues à des tiers.</p>
-            <h3 class="font-bold mt-4">Vos droits</h3>
-            <p class="mb-2">Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Contactez-nous à contact@fixnord.fr pour exercer ce droit.</p>
+            <p class="mb-4">Fixt Nord accorde une importance absolue à la protection de vos données.</p>
+            
+            <h3 class="font-bold mt-4 text-lg">Données collectées</h3>
+            <p class="mb-2">Nous collectons les informations suivantes lors de votre réservation : Nom, Prénom, Adresse email, Numéro de téléphone, Modèle et immatriculation/VIN du véhicule.</p>
+            
+            <h3 class="font-bold mt-4 text-lg">Finalité et Utilisation</h3>
+            <p class="mb-2">Ces données sont strictement nécessaires au traitement de la commande, à la vérification de la compatibilité des pièces, à la facturation et à la gestion du service après-vente (garantie). Elles ne sont jamais vendues, cédées ou louées à des tiers.</p>
+            
+            <h3 class="font-bold mt-4 text-lg">Vos droits</h3>
+            <p class="mb-2">Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'opposition et de suppression de vos données. Pour exercer ce droit, veuillez nous contacter à l'adresse suivante : contact@fixtnord.fr.</p>
         `,
       };
 

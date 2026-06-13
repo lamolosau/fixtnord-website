@@ -100,7 +100,7 @@
             <img
               src="img/logo.png"
               alt="Fixt Logo"
-              class="h-32 w-auto object-contain drop-shadow-md"
+              class="h-20 w-auto object-contain drop-shadow-md"
             />
           </a>
         </div>
@@ -123,14 +123,79 @@
           >
 
           <a
-            href="booking.html"
-            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm"
+            href="devis.html"
+            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm hidden md:block"
           >
-            Prendre RDV
+            Demander un devis
           </a>
+
+          <!-- Bouton Menu Mobile -->
+          <button
+            id="mobile-menu-btn"
+            class="md:hidden text-slate-600 text-2xl focus:outline-none"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
         </div>
       </div>
     </nav>
+
+    <!-- Menu Mobile Overlay -->
+    <div
+      id="mobile-menu"
+      class="fixed inset-0 bg-white z-[100] transform translate-x-full transition-transform duration-300 flex flex-col"
+    >
+      <div
+        class="p-6 flex justify-between items-center border-b border-slate-100"
+      >
+        <img
+          src="img/logo.png"
+          alt="Fixt Logo"
+          class="h-12 w-auto object-contain"
+        />
+        <button
+          id="mobile-menu-close"
+          class="text-slate-600 text-3xl focus:outline-none"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="flex flex-col p-8 gap-6 text-xl font-bold text-[#002050]">
+        <a
+          href="index.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Accueil</a
+        >
+        <a
+          href="index.html#services"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Services</a
+        >
+        <a
+          href="realisations.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Réalisations</a
+        >
+        <a
+          href="about.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >À propos</a
+        >
+        <a
+          href="avis.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Avis clients</a
+        >
+        <div class="mt-8 pt-8 border-t border-slate-100">
+          <a
+            href="devis.html"
+            class="mobile-link btn-primary block text-center py-4 rounded-2xl shadow-lg shadow-blue-200"
+          >
+            Demander un devis gratuit
+          </a>
+        </div>
+      </div>
+    </div>
 
     <main class="flex-grow pt-32 pb-20">
       <section class="max-w-7xl mx-auto px-8 mb-20">
@@ -141,7 +206,7 @@
             <i class="fa-solid fa-bolt"></i>
           </div>
           <h1
-            class="text-5xl md:text-6xl font-extrabold text-[#002050] mb-6 tracking-tight"
+            class="text-3xl md:text-6xl font-extrabold text-[#002050] mb-6 tracking-tight"
           >
             Moderniser, sans <br />
             <span
@@ -166,7 +231,9 @@
           ></div>
 
           <div class="md:w-1/2 space-y-6 relative z-10">
-            <h2 class="text-3xl font-bold text-[#002050]">Notre Mission</h2>
+            <h2 class="text-2xl md:text-3xl font-bold text-[#002050]">
+              Notre Mission
+            </h2>
             <div class="w-20 h-1 bg-[#5475FF] rounded-full"></div>
             <p class="text-slate-600 leading-relaxed">
               Basé au cœur du <strong>Nord-Pas-de-Calais</strong>, Fixt est le
@@ -293,10 +360,10 @@
               date d'installation.
             </p>
             <a
-              href="booking.html"
+              href="devis.html"
               class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-[#002050] bg-white rounded-xl hover:bg-blue-50 transition-all shadow-lg hover:scale-105"
             >
-              Voir nos offres
+              Demander un devis
               <i class="fa-solid fa-arrow-right ml-2"></i>
             </a>
           </div>
@@ -360,8 +427,8 @@
                 >
               </li>
               <li>
-                <a href="booking.html" class="hover:text-[#5475FF] transition"
-                  >Prendre Rendez-vous</a
+                <a href="devis.html" class="hover:text-[#5475FF] transition"
+                  >Demander un devis</a
                 >
               </li>
             </ul>
@@ -391,7 +458,7 @@
         <div
           class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600"
         >
-          <p>&copy; 2023 Fixt. Tous droits réservés.</p>
+          <p>&copy; 2025 Fixt. Tous droits réservés.</p>
           <div class="flex gap-6">
             <button
               onclick="openLegal('mentions')"

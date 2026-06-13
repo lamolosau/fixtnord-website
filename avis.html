@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
@@ -27,13 +27,81 @@
           class="h-20 w-auto object-contain"
         />
       </a>
-      <a
-        href="index.html"
-        class="text-slate-500 hover:text-[#002050] font-semibold text-sm transition"
-      >
-        <i class="fa-solid fa-arrow-left mr-1"></i> Retour au site
-      </a>
+
+      <div class="flex items-center gap-4">
+        <a
+          href="index.html"
+          class="text-slate-500 hover:text-[#002050] font-semibold text-sm transition hidden md:block"
+        >
+          <i class="fa-solid fa-arrow-left mr-1"></i> Retour au site
+        </a>
+
+        <!-- Bouton Menu Mobile -->
+        <button
+          id="mobile-menu-btn"
+          class="md:hidden text-slate-600 text-2xl focus:outline-none"
+        >
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
     </nav>
+
+    <!-- Menu Mobile Overlay -->
+    <div
+      id="mobile-menu"
+      class="fixed inset-0 bg-white z-[100] transform translate-x-full transition-transform duration-300 flex flex-col"
+    >
+      <div
+        class="p-6 flex justify-between items-center border-b border-slate-100"
+      >
+        <img
+          src="img/logo.png"
+          alt="Fixt Logo"
+          class="h-12 w-auto object-contain"
+        />
+        <button
+          id="mobile-menu-close"
+          class="text-slate-600 text-3xl focus:outline-none"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="flex flex-col p-8 gap-6 text-xl font-bold text-[#002050]">
+        <a
+          href="index.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Accueil</a
+        >
+        <a
+          href="index.html#services"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Services</a
+        >
+        <a
+          href="realisations.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Réalisations</a
+        >
+        <a
+          href="about.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >À propos</a
+        >
+        <a
+          href="avis.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Avis clients</a
+        >
+        <div class="mt-8 pt-8 border-t border-slate-100">
+          <a
+            href="devis.html"
+            class="mobile-link btn-primary block text-center py-4 rounded-2xl shadow-lg shadow-blue-200"
+          >
+            Demander un devis gratuit
+          </a>
+        </div>
+      </div>
+    </div>
 
     <main class="flex-grow flex items-center justify-center p-4">
       <div
@@ -141,6 +209,10 @@
       class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"
     ></div>
     <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"
+    ></div>
+    <div
       id="error-modal"
       class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-300"
     >
@@ -182,7 +254,9 @@
           </div>
 
           <button
-            onclick="document.getElementById('error-modal').classList.add('hidden')"
+            onclick="
+              document.getElementById('error-modal').classList.add('hidden')
+            "
             class="w-full bg-[#002050] hover:bg-[#5475FF] text-white font-bold py-3 rounded-xl transition-all shadow-lg"
           >
             J'ai compris, je corrige

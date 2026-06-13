@@ -68,7 +68,7 @@
             <img
               src="img/logo.png"
               alt="Fixt Logo"
-              class="h-32 w-auto object-contain drop-shadow-md"
+              class="h-20 w-auto object-contain drop-shadow-md"
             />
           </a>
         </div>
@@ -90,14 +90,79 @@
             >À propos</a
           >
           <a
-            href="booking.html"
-            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm"
+            href="devis.html"
+            class="btn-primary px-6 py-3 rounded-full font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5 transition-all text-sm hidden md:block"
           >
-            Prendre RDV
+            Demander un devis
           </a>
+
+          <!-- Bouton Menu Mobile -->
+          <button
+            id="mobile-menu-btn"
+            class="md:hidden text-slate-600 text-2xl focus:outline-none"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
         </div>
       </div>
     </nav>
+
+    <!-- Menu Mobile Overlay -->
+    <div
+      id="mobile-menu"
+      class="fixed inset-0 bg-white z-[100] transform translate-x-full transition-transform duration-300 flex flex-col"
+    >
+      <div
+        class="p-6 flex justify-between items-center border-b border-slate-100"
+      >
+        <img
+          src="img/logo.png"
+          alt="Fixt Logo"
+          class="h-12 w-auto object-contain"
+        />
+        <button
+          id="mobile-menu-close"
+          class="text-slate-600 text-3xl focus:outline-none"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="flex flex-col p-8 gap-6 text-xl font-bold text-[#002050]">
+        <a
+          href="index.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Accueil</a
+        >
+        <a
+          href="index.html#services"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Services</a
+        >
+        <a
+          href="realisations.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Réalisations</a
+        >
+        <a
+          href="about.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >À propos</a
+        >
+        <a
+          href="avis.html"
+          class="mobile-link hover:text-[#5475FF] transition-colors"
+          >Avis clients</a
+        >
+        <div class="mt-8 pt-8 border-t border-slate-100">
+          <a
+            href="devis.html"
+            class="mobile-link btn-primary block text-center py-4 rounded-2xl shadow-lg shadow-blue-200"
+          >
+            Demander un devis gratuit
+          </a>
+        </div>
+      </div>
+    </div>
 
     <main class="flex-grow pt-32 pb-20">
       <section class="max-w-7xl mx-auto px-8 mb-16 text-center">
@@ -105,7 +170,7 @@
           class="text-[#5475FF] font-bold tracking-wider uppercase text-sm mb-2 block animate-pulse"
           >Galerie & Portfolio</span
         >
-        <h1 class="text-4xl md:text-5xl font-extrabold text-[#002050] mb-6">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-[#002050] mb-6">
           Ils sont passés au <br /><span
             class="text-transparent bg-clip-text bg-gradient-to-r from-[#5475FF] to-blue-400"
             >numérique.</span
@@ -239,7 +304,7 @@
           <i class="fa-brands fa-tiktok text-[#5475FF]"></i> En Action
         </h2>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div
             class="group relative aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-slate-100"
           >
@@ -327,7 +392,7 @@
 
           <div
             class="aspect-[9/16] rounded-2xl overflow-hidden shadow-sm border-2 border-dashed border-blue-200 flex flex-col items-center justify-center p-4 text-center bg-blue-50 hover:bg-blue-100 transition cursor-pointer group"
-            onclick="window.location.href = 'booking.html'"
+            onclick="window.location.href = 'devis.html'"
           >
             <div
               class="w-12 h-12 rounded-full bg-[#5475FF] text-white flex items-center justify-center text-xl mb-3 shadow-lg group-hover:scale-110 transition"
@@ -336,7 +401,7 @@
             </div>
             <h3 class="font-bold text-[#002050]">Votre voiture ici ?</h3>
             <p class="text-xs text-slate-500 mt-2">
-              Réservez votre installation dès aujourd'hui.
+              Demandez votre devis dès aujourd'hui.
             </p>
           </div>
         </div>
@@ -362,10 +427,10 @@
               immédiat.
             </p>
             <a
-              href="booking.html"
+              href="devis.html"
               class="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#002050] rounded-xl font-bold hover:bg-blue-50 transition shadow-lg hover:scale-105"
             >
-              Commander ma pièce <i class="fa-solid fa-arrow-right"></i>
+              Demander un devis <i class="fa-solid fa-arrow-right"></i>
             </a>
           </div>
         </div>
@@ -423,8 +488,8 @@
                 >
               </li>
               <li>
-                <a href="booking.html" class="hover:text-[#5475FF] transition"
-                  >Prendre Rendez-vous</a
+                <a href="devis.html" class="hover:text-[#5475FF] transition"
+                  >Demander un devis</a
                 >
               </li>
             </ul>

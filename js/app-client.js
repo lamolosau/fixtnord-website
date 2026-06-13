@@ -1,5 +1,11 @@
 import { supabase } from "./config.js";
-import { showNotification } from "./utils.js";
+import {
+  showNotification,
+  validateEmail,
+  validatePhone,
+  sanitizeInput,
+  initMobileMenu,
+} from "./utils.js";
 
 // --- 1. AVIS & CAROUSEL ---
 async function updateGlobalRating() {
@@ -26,203 +32,336 @@ export async function loadReviewsCarousel() {
     .order("created_at", { ascending: false })
     .limit(10);
   if (!reviews) return;
+
+  // Si pas d'avis, afficher un message
+  if (reviews.length === 0) {
+    wrapper.innerHTML = `
+      <div class="w-[300px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0 mx-2">
+        <p class="text-slate-400 text-center">Soyez le premier à laisser un avis !</p>
+      </div>
+    `;
+    return;
+  }
+
   wrapper.innerHTML = reviews
     .map(
       (r) => `
     <div class="w-[300px] bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0 mx-2 snap-center">
         <div class="flex items-center gap-4 mb-4">
-            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">${r.customer_name.charAt(0)}</div>
-            <div><div class="font-bold text-[#002050]">${r.customer_name}</div><div class="text-xs text-slate-400">${r.car_model || "Client"}</div></div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#5475FF] font-bold uppercase">${sanitizeInput(r.customer_name.charAt(0))}</div>
+            <div><div class="font-bold text-[#002050]">${sanitizeInput(r.customer_name)}</div><div class="text-xs text-slate-400">${sanitizeInput(r.car_model || "Client")}</div></div>
             <div class="ml-auto text-orange-400 text-xs"><i class="fa-solid fa-star"></i> ${r.rating}/5</div>
         </div>
-        <p class="text-slate-500 text-sm line-clamp-4">"${r.comment}"</p>
+        <p class="text-slate-500 text-sm line-clamp-4">"${sanitizeInput(r.comment)}"</p>
     </div>`,
     )
     .join("");
+
+  // Dupliquer pour l'effet de défilement infini
+  wrapper.innerHTML += wrapper.innerHTML;
 }
 
-// --- 2. CATALOGUE & LOGIQUE DE SÉLECTION ---
-let selectedPiece = null;
-let currentMatchingRows = []; // Stocke toutes les lignes correspondant au modèle choisi
-
+// --- 2. RECHERCHE PAR PLAQUE (SIMULATION API) ---
 window.handlePlateLookup = function () {
-  showNotification(
-    "Recherche par plaque bientôt disponible. Remplissage manuel.",
-    "info",
-  );
-};
+  const plateInput = document.getElementById("plate-lookup-input");
+  const btn = document.getElementById("btn-plate-lookup");
+  const plate = plateInput.value.trim();
 
-export async function initCatalog() {
-  const brandSel = document.getElementById("select-brand");
-  if (!brandSel) return;
-
-  const { data: catalog, error } = await supabase
-    .from("vehicles_catalog")
-    .select("*")
-    .order("brand");
-
-  if (error || !catalog) {
-    brandSel.innerHTML =
-      '<option disabled class="text-slate-800 bg-white">Erreur de catalogue</option>';
+  if (!plate) {
+    showNotification("Veuillez entrer une plaque d'immatriculation", "error");
     return;
   }
 
-  // Remplir les Marques
-  const brands = [...new Set(catalog.map((i) => i.brand))];
-  brandSel.innerHTML =
-    '<option value="" disabled selected class="text-slate-800 bg-white">Choisir une marque...</option>' +
-    brands
-      .map(
-        (b) =>
-          `<option value="${b}" class="text-slate-800 bg-white">${b}</option>`,
-      )
-      .join("");
+  // Formatage basique pour l'affichage
+  const formattedPlate = plate.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-  // Événement : Changement de Marque
-  brandSel.addEventListener("change", (e) => {
-    const models = [
-      ...new Set(
-        catalog.filter((i) => i.brand === e.target.value).map((i) => i.model),
-      ),
-    ];
-    const modelSel = document.getElementById("select-model");
-    modelSel.innerHTML =
-      '<option value="" disabled selected class="text-slate-800 bg-white">Choisir un modèle...</option>' +
-      models
-        .map(
-          (m) =>
-            `<option value="${m}" class="text-slate-800 bg-white">${m}</option>`,
-        )
-        .join("");
-    modelSel.disabled = false;
-    document.getElementById("select-year").disabled = true;
-    document.getElementById("catalog-result").classList.add("hidden");
-  });
-
-  // Événement : Changement de Modèle (Correction ici pour gérer plusieurs lignes)
-  document.getElementById("select-model").addEventListener("change", (e) => {
-    const selectedBrand = brandSel.value;
-    const selectedModel = e.target.value;
-    const yearSel = document.getElementById("select-year");
-
-    // On récupère TOUTES les lignes qui correspondent à ce modèle (Phase 1, Phase 2, etc.)
-    currentMatchingRows = catalog.filter(
-      (i) => i.brand === selectedBrand && i.model === selectedModel,
-    );
-
-    let allYears = new Set();
-    // On boucle sur chaque ligne trouvée pour extraire toutes les années possibles
-    currentMatchingRows.forEach((row) => {
-      for (let y = row.year_start; y <= row.year_end; y++) {
-        allYears.add(y);
-      }
-    });
-
-    // On trie les années par ordre croissant
-    const sortedYears = Array.from(allYears).sort((a, b) => a - b);
-
-    let opts =
-      '<option value="" disabled selected class="text-slate-800 bg-white">Année...</option>';
-    sortedYears.forEach((y) => {
-      opts += `<option value="${y}" class="text-slate-800 bg-white">${y}</option>`;
-    });
-
-    yearSel.innerHTML = opts;
-    yearSel.disabled = false;
-    document.getElementById("catalog-result").classList.add("hidden");
-    document.getElementById("pay-btn").disabled = true;
-  });
-
-  // Événement : Changement d'Année
-  document.getElementById("select-year").addEventListener("change", (e) => {
-    const yearChosen = parseInt(e.target.value);
-
-    // On cherche dans nos lignes celle qui couvre l'année sélectionnée
-    selectedPiece = currentMatchingRows.find(
-      (row) => yearChosen >= row.year_start && yearChosen <= row.year_end,
-    );
-
-    if (selectedPiece) {
-      document.getElementById("result-part-name").innerText =
-        selectedPiece.part_name;
-      document.getElementById("result-price").innerText =
-        selectedPiece.price + "€";
-      document.getElementById("catalog-result").classList.remove("hidden");
-
-      // Remplissage des champs cachés pour la commande
-      document.getElementById("final-part-name").value =
-        selectedPiece.part_name;
-      document.getElementById("final-price").value = selectedPiece.price;
-      document.getElementById("final-vehicle").value =
-        `${selectedPiece.brand} ${selectedPiece.model} (${yearChosen})`;
-
-      document.getElementById("pay-btn").disabled = false;
-    }
-  });
-}
-
-// --- 3. PAIEMENT & ENREGISTREMENT ---
-export async function handlePayment(e) {
-  e.preventDefault();
-  const btn = document.getElementById("pay-btn");
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Traitement...';
+  // Simulation de chargement
+  const originalIcon = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
   btn.disabled = true;
 
-  const data = {
-    customer_name:
-      document.getElementById("prenom").value +
-      " " +
-      document.getElementById("nom").value,
-    email: document.getElementById("email").value,
-    phone: document.getElementById("tel").value,
-    car_model: document.getElementById("final-vehicle").value,
-    address: document.getElementById("address").value,
-    service_name: document.getElementById("final-part-name").value,
-    price: document.getElementById("final-price").value,
-    status: "pending",
-  };
-
-  const { error } = await supabase.from("bookings").insert([data]);
-
-  if (!error) {
-    document.getElementById("booking-page").innerHTML = `
-            <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl text-center max-w-2xl mx-auto w-full my-12">
-                <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6"><i class="fa-solid fa-check"></i></div>
-                <h2 class="text-3xl font-extrabold text-[#002050] mb-4">Commande confirmée !</h2>
-                <p class="text-slate-500 mb-8">Votre commande de pièce a été enregistrée.</p>
-                <div class="bg-blue-50 p-6 rounded-2xl mb-8 text-left border border-blue-100">
-                    <p class="font-bold text-[#002050]">Étape suivante :</p>
-                    <p class="text-slate-600 mt-2">Appelez-nous au <a href="tel:0783728977" class="text-[#5475FF] font-bold underline">07 83 72 89 77</a> pour fixer le RDV d'installation.</p>
-                </div>
-                <a href="index.html" class="bg-slate-100 text-[#002050] px-8 py-4 rounded-xl font-bold">Retour</a>
-            </div>`;
-  } else {
-    showNotification("Erreur lors de la commande.", "error");
-    btn.innerHTML = "Payer ma pièce";
+  setTimeout(() => {
+    // Remettre le bouton à l'état initial
+    btn.innerHTML = originalIcon;
     btn.disabled = false;
-  }
-}
 
-// --- 4. DEMANDE SUR MESURE ---
-window.handleCustomRequest = async function (e) {
+    // Afficher le message d'indisponibilité
+    showNotification(
+      "Le service de recherche automatique est temporairement en maintenance. Veuillez saisir les informations manuellement.",
+      "info",
+    );
+
+    // Pré-remplir le champ plaque manuel pour faire gagner du temps
+    const manualPlateInput = document.getElementById("input-plate");
+    if (manualPlateInput) {
+      manualPlateInput.value = plate;
+      // Petit effet visuel pour montrer que ça a été copié
+      manualPlateInput.classList.add("ring-2", "ring-[#5475FF]");
+      setTimeout(
+        () => manualPlateInput.classList.remove("ring-2", "ring-[#5475FF]"),
+        1000,
+      );
+    }
+
+    /* 
+    // --- CODE PRÊT POUR L'API FUTURE ---
+    // À décommenter quand vous aurez une API (ex: SIV, API Plaque, etc.)
+    
+    try {
+      const response = await fetch(`URL_DE_VOTRE_API?plate=${formattedPlate}&apikey=VOTRE_CLE`);
+      const data = await response.json();
+      
+      if (data && data.success) {
+        // Remplir les champs
+        document.getElementById("input-brand").value = data.vehicle.brand;
+        document.getElementById("input-model").value = data.vehicle.model;
+        document.getElementById("input-year").value = data.vehicle.year;
+        document.getElementById("input-plate").value = formattedPlate;
+        
+        showNotification("Véhicule trouvé !", "success");
+      } else {
+        showNotification("Véhicule introuvable. Veuillez saisir manuellement.", "error");
+      }
+    } catch (error) {
+      showNotification("Erreur de connexion au service.", "error");
+    }
+    */
+  }, 1500); // Simule 1.5s de temps de réponse réseau
+};
+
+// --- 3. SOUMISSION DEMANDE DE DEVIS ---
+window.handleDevisSubmit = async function (e) {
   e.preventDefault();
-  const data = {
-    customer_name: document.getElementById("custom-name").value,
-    phone: document.getElementById("custom-phone").value,
-    car_model: `${document.getElementById("custom-brand").value} ${document.getElementById("custom-model").value} (${document.getElementById("custom-year").value})`,
-    service_name: "DEMANDE SUR MESURE (Devis)",
-    price: 0,
-    status: "pending",
-  };
-  const { error } = await supabase.from("bookings").insert([data]);
-  if (!error) {
-    document.getElementById("custom-request-modal").classList.add("hidden");
-    showNotification("Demande envoyée !", "success");
+
+  const btn = document.getElementById("submit-btn");
+  const originalText = btn.innerHTML;
+  btn.innerHTML =
+    '<i class="fa-solid fa-spinner fa-spin"></i> Envoi en cours...';
+  btn.disabled = true;
+
+  try {
+    // Récupération et validation des données
+    const prenom = sanitizeInput(
+      document.getElementById("prenom").value.trim(),
+    );
+    const nom = sanitizeInput(document.getElementById("nom").value.trim());
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("tel").value.trim();
+    const address = sanitizeInput(
+      document.getElementById("address").value.trim(),
+    );
+    const plate = sanitizeInput(
+      document.getElementById("plate")?.value.trim() || "",
+    );
+    const message = sanitizeInput(
+      document.getElementById("message")?.value.trim() || "",
+    );
+
+    // Validation
+    if (!validateEmail(email)) {
+      showNotification("Email invalide", "error");
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      showNotification(
+        "Numéro de téléphone invalide (format français requis)",
+        "error",
+      );
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    // Récupération des services sélectionnés
+    const serviceCheckboxes = document.querySelectorAll(
+      'input[name="service"]:checked',
+    );
+    const services = Array.from(serviceCheckboxes).map((cb) => cb.value);
+
+    if (services.length === 0) {
+      showNotification("Veuillez sélectionner au moins un service", "error");
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    // Récupération des infos véhicule
+    const carBrand = sanitizeInput(
+      document.getElementById("input-brand")?.value.trim() || "Non spécifié",
+    );
+    const carModel = sanitizeInput(
+      document.getElementById("input-model")?.value.trim() || "Non spécifié",
+    );
+    const carYear =
+      parseInt(document.getElementById("input-year")?.value) || null;
+    const carPlate = sanitizeInput(
+      document.getElementById("input-plate")?.value.trim() || "",
+    );
+
+    // Préparation des données
+    const data = {
+      customer_name: `${prenom} ${nom}`,
+      email: email,
+      phone: phone,
+      address: address,
+      car_brand: carBrand,
+      car_model: carModel,
+      car_year: carYear,
+      car_plate: carPlate || plate || null,
+      services: services,
+      message: message || null,
+      status: "pending",
+    };
+
+    // Insertion dans Supabase
+    const { error } = await supabase.from("quote_requests").insert([data]);
+
+    if (error) {
+      console.error("Erreur Supabase:", error);
+      showNotification("Erreur lors de l'envoi. Veuillez réessayer.", "error");
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    // Succès - Afficher page de confirmation
+    document.getElementById("devis-page").innerHTML = `
+      <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl text-center max-w-2xl mx-auto w-full my-12">
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h2 class="text-3xl font-extrabold text-[#002050] mb-4">Demande envoyée !</h2>
+        <p class="text-slate-500 mb-8">
+          Votre demande de devis a bien été enregistrée. Nous vous recontacterons dans les 24h par email ou téléphone.
+        </p>
+        <div class="bg-blue-50 p-6 rounded-2xl mb-8 text-left border border-blue-100">
+          <p class="font-bold text-[#002050] mb-2">
+            <i class="fa-solid fa-circle-info text-[#5475FF] mr-2"></i>Récapitulatif
+          </p>
+          <p class="text-slate-600 text-sm"><strong>Véhicule :</strong> ${carBrand} ${carModel} ${carYear ? `(${carYear})` : ""}</p>
+          <p class="text-slate-600 text-sm"><strong>Services :</strong> ${services.join(", ")}</p>
+          <p class="text-slate-600 text-sm"><strong>Email :</strong> ${email}</p>
+        </div>
+        <div class="flex gap-4 justify-center">
+          <a href="index.html" class="bg-[#002050] hover:bg-[#5475FF] text-white px-8 py-4 rounded-xl font-bold transition-all">
+            Retour à l'accueil
+          </a>
+          <a href="devis.html" class="bg-slate-100 text-[#002050] px-8 py-4 rounded-xl font-bold hover:bg-slate-200 transition-all">
+            Nouvelle demande
+          </a>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    console.error("Erreur:", err);
+    showNotification("Une erreur est survenue. Veuillez réessayer.", "error");
+    btn.innerHTML = originalText;
+    btn.disabled = false;
   }
 };
 
+// --- 4. INITIALISATION GLOBALE ---
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialisation du menu mobile
+  initMobileMenu();
+
+  // Chargement des avis et note globale
   loadReviewsCarousel();
   updateGlobalRating();
-  if (document.getElementById("booking-page")) initCatalog();
+
+  // Gestion des étoiles (page avis.html)
+  const starContainer = document.getElementById("star-container");
+  if (starContainer) {
+    const stars = starContainer.querySelectorAll("i");
+    const ratingInput = document.getElementById("rating-value");
+
+    stars.forEach((star, index) => {
+      star.addEventListener("click", () => {
+        const value = index + 1;
+        ratingInput.value = value;
+
+        stars.forEach((s, i) => {
+          if (i < value) {
+            s.classList.remove("fa-regular");
+            s.classList.add("fa-solid", "text-orange-400");
+          } else {
+            s.classList.remove("fa-solid", "text-orange-400");
+            s.classList.add("fa-regular");
+          }
+        });
+      });
+
+      star.addEventListener("mouseenter", () => {
+        stars.forEach((s, i) => {
+          if (i <= index) {
+            s.classList.add("text-orange-400");
+          } else {
+            s.classList.remove("text-orange-400");
+          }
+        });
+      });
+    });
+
+    starContainer.addEventListener("mouseleave", () => {
+      const currentValue = parseInt(ratingInput.value) || 0;
+      stars.forEach((s, i) => {
+        if (i < currentValue) {
+          s.classList.add("text-orange-400");
+        } else {
+          s.classList.remove("text-orange-400");
+        }
+      });
+    });
+  }
+
+  // Soumission d'avis
+  const reviewForm = document.getElementById("review-form");
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const rating = parseInt(document.getElementById("rating-value").value);
+      const name = sanitizeInput(
+        document.getElementById("review-name").value.trim(),
+      );
+      const car = sanitizeInput(
+        document.getElementById("review-car").value.trim(),
+      );
+      const comment = sanitizeInput(
+        document.getElementById("review-comment").value.trim(),
+      );
+
+      if (!rating || rating < 1 || rating > 5) {
+        showNotification("Veuillez sélectionner une note", "error");
+        return;
+      }
+
+      const btn = document.getElementById("btn-submit-review");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi...';
+
+      const data = {
+        customer_name: name,
+        car_model: car,
+        rating: rating,
+        comment: comment,
+        approved: false,
+      };
+
+      const { error } = await supabase.from("reviews").insert([data]);
+
+      if (error) {
+        showNotification("Erreur lors de l'envoi", "error");
+        btn.disabled = false;
+        btn.innerHTML = "Publier mon avis";
+        return;
+      }
+
+      document.getElementById("review-form").classList.add("hidden");
+      document.getElementById("review-success").classList.remove("hidden");
+    });
+  }
 });
